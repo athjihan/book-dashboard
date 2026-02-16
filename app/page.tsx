@@ -9,10 +9,10 @@ export default function Home() {
           Manage your books and collections with ease.
         </p>
         <Link
-          href="/api/auth/signin?callbackUrl=/dashboard"
+          href="/catalog"
           className="mt-6 inline-flex items-center justify-center rounded-3xl bg-green-600 px-4 py-2 text-white hover:bg-green-700"
         >
-          Login
+          Go to Catalog
         </Link>
       </div>
     </div>

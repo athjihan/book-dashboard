@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Book Dashboard
 
-## Getting Started
+A small library dashboard built with Next.js App Router, Prisma, and PostgreSQL. It provides a public catalog view and an authenticated dashboard for managing books and categories.
 
-First, run the development server:
+## Features
+
+- Public catalog with book and category lists, stats, and pagination.
+- Authenticated dashboard for CRUD operations on books and categories.
+- NextAuth credentials login (demo-friendly).
+- Prisma + PostgreSQL data layer with seed data.
+
+## Tech Stack
+
+- Next.js (App Router)
+- React 19
+- Prisma ORM with PostgreSQL
+- NextAuth (credentials)
+- Tailwind CSS
+
+## Routes
+
+- `/` landing page with login entry.
+- `/catalog` public catalog (read-only).
+- `/dashboard` authenticated dashboard (create, update, delete).
+
+## API Endpoints
+
+- `GET /api/books` (public, paginated)
+- `POST /api/books` (auth required)
+- `PUT /api/books` (auth required)
+- `DELETE /api/books` (auth required)
+- `GET /api/categories` (public, paginated)
+- `POST /api/categories` (auth required)
+- `PUT /api/categories` (auth required)
+- `DELETE /api/categories` (auth required)
+
+## Environment Variables
+
+Create a `.env` file in the project root with:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+NEXTAUTH_SECRET="replace-with-a-long-random-string"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open http://localhost:3000.
 
-## Learn More
+## Demo Credentials
 
-To learn more about Next.js, take a look at the following resources:
+Use these credentials to log in:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Email: admin@local.com
+- Password: password123
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+- `npm run dev` Start the dev server
+- `npm run build` Build for production
+- `npm run start` Start the production server
+- `npm run lint` Run ESLint
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The credentials provider is currently hardcoded for demo use.
+- Seed data creates sample categories and books.
