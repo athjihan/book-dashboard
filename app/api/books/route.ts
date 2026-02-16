@@ -65,3 +65,80 @@ export async function GET() {
         );
     }
 }
+
+export async function DELETE(request: NextRequest) {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const body = await request.json();
+        const id = Number(body?.id);
+
+        if (!id || Number.isNaN(id)) {
+            return NextResponse.json(
+                { error: "Missing or invalid book id" },
+                { status: 400 }
+            );
+        }
+
+        await prisma.book.delete({ where: { id } });
+
+        return NextResponse.json({ ok: true });
+    } catch (error) {
+        console.error("Error deleting book:", error);
+        return NextResponse.json(
+            { error: "Failed to delete book" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function PUT(request: NextRequest) {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const body = await request.json();
+        const { id, title, author, categoryName, stock } = body;
+
+        if (!id || !title || !author || !categoryName || stock == null) {
+            return NextResponse.json(
+                { error: "Missing required fields" },
+                { status: 400 }
+            );
+        }
+
+        let category = await prisma.category.findFirst({
+            where: { name: categoryName },
+        });
+
+        if (!category) {
+            category = await prisma.category.create({
+                data: { name: categoryName },
+            });
+        }
+
+        const book = await prisma.book.update({
+            where: { id },
+            data: {
+                title,
+                author,
+                stock: parseInt(stock),
+                categoryId: category.id,
+            },
+            include: { category: true },
+        });
+
+        return NextResponse.json(book, { status: 201 });
+    } catch (error) {
+        console.error("Error updating book:", error);
+        return NextResponse.json(
+            { error: "Failed to update book" },
+            { status: 500 }
+        );
+    }
+}
