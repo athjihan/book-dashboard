@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Edit } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function EditCategoryButton({ category }: { category: any }) {
+export default function AddCategoryButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -17,15 +17,14 @@ export default function EditCategoryButton({ category }: { category: any }) {
 
         const formData = new FormData(event.currentTarget);
         const data = {
-            id: category.id,
             categoryName: formData.get("categoryName") as string,
         };
 
         try {
             const response = await fetch("/api/categories", {
-                method: "PUT",
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...data, id: category.id }),
+                body: JSON.stringify(data),
             });
 
             if (!response.ok) {
@@ -47,12 +46,12 @@ export default function EditCategoryButton({ category }: { category: any }) {
             <button
                 type="button"
                 onClick={() => setIsOpen(true)}
-                className="flex items-center justify-center gap-2 rounded-2xl border bg-blue-600 px-4 py-2 text-white shadow-sm transition hover:bg-blue-700"
+                className="flex items-center justify-center gap-2 rounded-2xl border bg-green-600 px-4 py-2 text-white shadow-sm transition hover:bg-green-700"
             >
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
-                    <Edit className="h-4 w-4" aria-hidden="true" />
+                    <Plus className="h-4 w-4" aria-hidden="true" />
                 </span>
-                <span className="font-medium">Edit</span>
+                <span className="font-medium">Tambah Kategori</span>
             </button>
 
             {isOpen ? (
@@ -60,9 +59,9 @@ export default function EditCategoryButton({ category }: { category: any }) {
                     <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-xl font-semibold text-zinc-900">Edit Kategori</h2>
+                                <h2 className="text-xl font-semibold text-zinc-900">Tambah Kategori</h2>
                                 <p className="mt-1 text-sm text-zinc-500">
-                                    Ubah data kategori sebelum disimpan ke database.
+                                    Isi data kategori baru sebelum disimpan ke database.
                                 </p>
                             </div>
                         </div>
@@ -82,12 +81,10 @@ export default function EditCategoryButton({ category }: { category: any }) {
                                     name="categoryName"
                                     type="text"
                                     required
-                                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-blue-600 focus:outline-none"
+                                    className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-green-600 focus:outline-none"
                                     placeholder="Contoh: Teknologi"
-                                    defaultValue={category.name}
                                 />
                             </label>
-
                             <div className="mt-2 flex items-center justify-end gap-3">
                                 <button
                                     type="button"
@@ -100,7 +97,7 @@ export default function EditCategoryButton({ category }: { category: any }) {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                                    className="rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                                 >
                                     {isLoading ? "Menyimpan..." : "Simpan"}
                                 </button>

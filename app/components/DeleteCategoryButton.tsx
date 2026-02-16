@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {  Trash2Icon } from "lucide-react";
+import { Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function DeleteCategoryButton({ category }: { category: any }) {

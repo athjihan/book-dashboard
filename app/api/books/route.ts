@@ -50,13 +50,36 @@ export async function POST(request: NextRequest) {
     }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const books = await prisma.book.findMany({
-            include: { category: true },
-            orderBy: { createdAt: "desc" },
+        const { searchParams } = new URL(request.url);
+        const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+        const pageSize = Math.min(
+            100,
+            Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10)
+        );
+
+        const [books, total] = await Promise.all([
+            prisma.book.findMany({
+                include: { category: true },
+                orderBy: { createdAt: "desc" },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            prisma.book.count(),
+        ]);
+
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+        return NextResponse.json({
+            data: books,
+            meta: {
+                page,
+                pageSize,
+                total,
+                totalPages,
+            },
         });
-        return NextResponse.json(books);
     } catch (error) {
         console.error("Error fetching books:", error);
         return NextResponse.json(
