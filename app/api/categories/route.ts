@@ -30,11 +30,15 @@ async function getCategoriesForAdmin(request: NextRequest) {
         const { page, pageSize } = getPaginationParams(request);
         const [categories, total] = await Promise.all([
         prisma.category.findMany({
+            where: { deletedAt: null },
+            include: { _count: { select: { books: true } } },
             orderBy: { name: "asc" },
             skip: (page - 1) * pageSize,
             take: pageSize,
         }),
-        prisma.category.count(),
+        prisma.category.count({
+            where: { deletedAt: null },
+        }),
         ]);
 
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -69,11 +73,15 @@ async function getCategoriesForNonAdmin(request: NextRequest) {
     const { page, pageSize } = getPaginationParams(request);
     const [categories, total] = await Promise.all([
         prisma.category.findMany({
+            where: { deletedAt: null },
+            include: { _count: { select: { books: true } } },
             orderBy: { name: "asc" },
             skip: (page - 1) * pageSize,
             take: pageSize,
         }),
-        prisma.category.count(),
+        prisma.category.count({
+            where: { deletedAt: null },
+        }),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(total / pageSize));

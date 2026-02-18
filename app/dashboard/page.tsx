@@ -1,4 +1,3 @@
-import { prisma } from "../lib/prisma";
 import Link from "next/link";
 import AddBookButton from "../components/AddBookButton";
 import LogoutButton from "../components/LogoutButton";
@@ -11,6 +10,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import AddCategoryButton from "../components/AddCategoryButton";
 import { unstable_noStore as noStore } from "next/cache";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -18,6 +18,40 @@ export const revalidate = 0;
 type DashboardSearchParams = {
     bookPage?: string;
     categoryPage?: string;
+};
+
+type BookItem = {
+    id: number;
+    title: string;
+    author: string;
+    stock: number;
+    updatedAt: string;
+    category: {
+        id: number;
+        name: string;
+    };
+};
+
+type CategoryItem = {
+    id: number;
+    name: string;
+    _count: {
+        books: number;
+    };
+};
+
+type PaginatedResponse<T> = {
+    success: boolean;
+    status: number;
+    message: string;
+    data: T[];
+    meta: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+        totalStock?: number;
+    };
 };
 
 export default async function DashboardPage({
@@ -29,7 +63,7 @@ export default async function DashboardPage({
     noStore();
     const session = await getServerSession(authOptions);
     if (!session) {
-        redirect("/auth/signin?callbackUrl=%2Fdashboard");
+        redirect("/api/auth/signin");
     }
 
     const bookPageSize = 5;
@@ -43,33 +77,6 @@ export default async function DashboardPage({
         Number(resolvedSearchParams?.categoryPage ?? "1") || 1
     );
 
-    const [books, booksTotal, categories, categoriesTotal, stockAggregate] =
-        await Promise.all([
-            prisma.book.findMany({
-                include: { category: true },
-                orderBy: { createdAt: "desc" },
-                skip: (bookPage - 1) * bookPageSize,
-                take: bookPageSize,
-            }),
-            prisma.book.count(),
-            prisma.category.findMany({
-                include: { _count: { select: { books: true } } },
-                orderBy: { name: "asc" },
-                skip: (categoryPage - 1) * categoryPageSize,
-                take: categoryPageSize,
-            }),
-            prisma.category.count(),
-            prisma.book.aggregate({ _sum: { stock: true } }),
-        ]);
-
-    const totalStock = stockAggregate._sum.stock ?? 0;
-    const categoryCount = categoriesTotal;
-    const totalBookCount = booksTotal;
-    const bookTotalPages = Math.max(1, Math.ceil(booksTotal / bookPageSize));
-    const categoryTotalPages = Math.max(
-        1,
-        Math.ceil(categoriesTotal / categoryPageSize)
-    );
     const buildHref = (nextBookPage: number, nextCategoryPage: number) =>
         `?bookPage=${nextBookPage}&categoryPage=${nextCategoryPage}`;
     const getPageNumbers = (current: number, total: number) => {
@@ -80,6 +87,54 @@ export default async function DashboardPage({
         return Array.from({ length: end - start + 1 }, (_, index) => start + index);
     };
     const dateFormatter = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" });
+
+    const headersList = await headers();
+    const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
+    const protocol = headersList.get("x-forwarded-proto") ?? "http";
+
+    if (!host) {
+        throw new Error("Host header tidak ditemukan");
+    }
+
+    const baseUrl = `${protocol}://${host}`;
+
+    const fetchBooks = async (): Promise<PaginatedResponse<BookItem>> => {
+        const response = await fetch(
+            `${baseUrl}/api/books?page=${bookPage}&pageSize=${bookPageSize}`,
+            { cache: "no-store" }
+        );
+        if (!response.ok) {
+            throw new Error("Gagal mengambil data buku");
+        }
+        return response.json();
+    };
+
+    const fetchCategories = async (): Promise<PaginatedResponse<CategoryItem>> => {
+        const response = await fetch(
+            `${baseUrl}/api/categories?page=${categoryPage}&pageSize=${categoryPageSize}`,
+            { cache: "no-store" }
+        );
+        if (!response.ok) {
+            throw new Error("Gagal mengambil data kategori");
+        }
+        return response.json();
+    };
+
+    const [booksResponse, categoriesResponse] = await Promise.all([
+        fetchBooks(),
+        fetchCategories(),
+    ]);
+
+    const books = booksResponse.data ?? [];
+    const categories = categoriesResponse.data ?? [];
+
+    const totalBookCount = booksResponse.meta?.total ?? 0;
+    const totalStock =
+        booksResponse.meta?.totalStock ??
+        books.reduce((sum, book) => sum + book.stock, 0);
+    const categoryCount = categoriesResponse.meta?.total ?? 0;
+    const bookTotalPages = Math.max(1, booksResponse.meta?.totalPages ?? 1);
+    const categoryTotalPages = Math.max(1, categoriesResponse.meta?.totalPages ?? 1);
 
     return (
         <section className="relative flex min-h-screen flex-col gap-6 bg-zinc-50 px-6 py-10 text-zinc-900">
@@ -146,7 +201,7 @@ export default async function DashboardPage({
                                                 {book.stock}
                                             </td>
                                             <td className="px-6 py-4 text-zinc-600">
-                                                {dateFormatter.format(book.updatedAt)}
+                                                {dateFormatter.format(new Date(book.updatedAt))}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end space-x-2">

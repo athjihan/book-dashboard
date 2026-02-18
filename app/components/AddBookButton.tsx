@@ -18,8 +18,6 @@ export default function AddBookButton() {
     const [categoryError, setCategoryError] = useState("");
     const router = useRouter();
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-
     useEffect(() => {
         if (!isOpen) return;
 
@@ -28,7 +26,7 @@ export default function AddBookButton() {
             setCategoryError("");
 
             try {
-                const response = await fetch(`${baseUrl}/api/categories`, {
+                const response = await fetch(`/api/categories`, {
                     method: "GET",
                     cache: "no-store",
                 });
@@ -63,7 +61,7 @@ export default function AddBookButton() {
         };
 
         try {
-            const response = await fetch(`${baseUrl}/api/books`, {
+            const response = await fetch(`/api/books`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
