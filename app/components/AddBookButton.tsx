@@ -1,14 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+type Category = {
+    id: number;
+    name: string;
+};
 
 export default function AddBookButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+    const [categoryError, setCategoryError] = useState("");
     const router = useRouter();
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const fetchCategories = async () => {
+            setIsCategoryLoading(true);
+            setCategoryError("");
+
+            try {
+                const response = await fetch(`${baseUrl}/api/categories`, {
+                    method: "GET",
+                    cache: "no-store",
+                });
+
+                if (!response.ok) {
+                    throw new Error("Gagal mengambil kategori");
+                }
+
+                const result = await response.json()
+                setCategories(Array.isArray(result?.data) ? result.data : []);
+            } catch (err) {
+                setCategoryError(err instanceof Error ? err.message : "Terjadi kesalahan");
+            } finally {
+                setIsCategoryLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, [isOpen]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -19,12 +58,12 @@ export default function AddBookButton() {
         const data = {
             title: formData.get("title") as string,
             author: formData.get("author") as string,
-            categoryName: formData.get("categoryName") as string,
+            categoryId: Number(formData.get("categoryId")),
             stock: formData.get("stock") as string,
         };
 
         try {
-            const response = await fetch("/api/books", {
+            const response = await fetch(`${baseUrl}/api/books`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
@@ -32,7 +71,7 @@ export default function AddBookButton() {
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || "Gagal menyimpan buku");
+                throw new Error(error.message || "Gagal menyimpan buku");
             }
 
             setIsOpen(false);
@@ -100,13 +139,25 @@ export default function AddBookButton() {
                             </label>
                             <label className="grid gap-2 text-sm font-medium text-zinc-700">
                                 Kategori
-                                <input
-                                    name="categoryName"
-                                    type="text"
+                                <select
+                                    name="categoryId"
                                     required
                                     className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-green-600 focus:outline-none"
-                                    placeholder="Contoh: Teknologi"
-                                />
+                                    disabled={isCategoryLoading || categories.length === 0}
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>
+                                        {isCategoryLoading ? "Memuat kategori..." : "Pilih kategori"}
+                                    </option>
+                                    {categories.map((category) => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {categoryError && (
+                                    <span className="text-xs font-normal text-red-600">{categoryError}</span>
+                                )}
                             </label>
                             <label className="grid gap-2 text-sm font-medium text-zinc-700">
                                 Stok

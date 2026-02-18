@@ -14,11 +14,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   email     String   @unique
   password  String   
   name      String?
   createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
 }
 
 model Category {
@@ -27,6 +29,7 @@ model Category {
   books     Book[]   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 }
 
 model Book {
@@ -35,7 +38,9 @@ model Book {
   author      String
   stock       Int
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  category    Category @relation(fields: [categoryId], references: [id])
 }

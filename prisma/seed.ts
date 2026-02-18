@@ -20,16 +20,12 @@ async function main() {
     });
     console.log(`Created user: ${admin.email}`);
 
-    const catFiksi = await prisma.category.create({
-        data: { name: "Fiksi & Sastra" },
-    });
-
-    const catTekno = await prisma.category.create({
-        data: { name: "Teknologi & Komputer" },
-    });
-
-    const catSelfDev = await prisma.category.create({
-        data: { name: "Pengembangan Diri" },
+    await prisma.category.createMany({
+        data: [
+            { name: "Fiksi & Sastra" },
+            { name: "Teknologi & Komputer" },
+            { name: "Pengembangan Diri" },
+        ],
     });
 
     console.log("Created categories.");
@@ -40,43 +36,43 @@ async function main() {
                 title: "Laskar Pelangi",
                 author: "Andrea Hirata",
                 stock: 5,
-                categoryId: catFiksi.id,
+                categoryId: 1,
             },
             {
                 title: "Bumi Manusia",
                 author: "Pramoedya Ananta Toer",
                 stock: 3,
-                categoryId: catFiksi.id,
+                categoryId: 2,
             },
             {
                 title: "Clean Code",
                 author: "Robert C. Martin",
                 stock: 10,
-                categoryId: catTekno.id,
+                categoryId: 3,
             },
             {
                 title: "The Pragmatic Programmer",
                 author: "Andrew Hunt",
                 stock: 8,
-                categoryId: catTekno.id,
+                categoryId: 4,
             },
             {
                 title: "Refactoring UI",
                 author: "Adam Wathan",
                 stock: 4,
-                categoryId: catTekno.id,
+                categoryId: 5,
             },
             {
                 title: "Atomic Habits",
                 author: "James Clear",
                 stock: 15,
-                categoryId: catSelfDev.id,
+                categoryId: 6,
             },
             {
                 title: "Filosofi Teras",
                 author: "Henry Manampiring",
                 stock: 7,
-                categoryId: catSelfDev.id,
+                categoryId: 7,
             },
         ],
     });

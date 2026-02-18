@@ -29,7 +29,7 @@ export default async function DashboardPage({
     noStore();
     const session = await getServerSession(authOptions);
     if (!session) {
-        redirect("/api/auth/signin?callbackUrl=%2Fdashboard");
+        redirect("/auth/signin?callbackUrl=%2Fdashboard");
     }
 
     const bookPageSize = 5;

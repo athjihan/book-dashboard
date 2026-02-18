@@ -69,6 +69,7 @@ export default function AddCategoryButton() {
                         <form
                             className="mt-6 grid gap-4"
                             onSubmit={handleSubmit}
+                            autoComplete="off"
                         >
                             {error && (
                                 <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
