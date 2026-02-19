@@ -14,17 +14,21 @@ function getPaginationParams(request: NextRequest) {
     return { page, pageSize };
 }
 
+function unauthorizedResponse() {
+    return NextResponse.json(
+        {
+            success: false,
+            status: 401,
+            message: "Unauthorized",
+        },
+        { status: 401 },
+    );
+}
+
 async function getCategoriesForAdmin(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
-        return NextResponse.json(
-            { 
-                success: false, 
-                status: 401, 
-                message: "Unauthorized" 
-            }, 
-            { status: 401 },
-        );
+        return unauthorizedResponse();
     }
     try {
         const { page, pageSize } = getPaginationParams(request);
@@ -103,14 +107,7 @@ async function getCategoriesForNonAdmin(request: NextRequest) {
 export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
-        return NextResponse.json(
-            { 
-                success: false, 
-                status: 401, 
-                message: "Unauthorized" 
-            }, 
-            { status: 401 },
-        );
+        return unauthorizedResponse();
     }
 
     try {
@@ -157,14 +154,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
-        return NextResponse.json(
-            { 
-                success: false, 
-                status: 401, 
-                message: "Unauthorized" 
-            }, 
-            { status: 401 }
-        );
+        return unauthorizedResponse();
     }
 
     try {
@@ -234,14 +224,7 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
-        return NextResponse.json(
-            { 
-                success: false, 
-                status: 401, 
-                message: "Unauthorized" 
-            },
-            { status: 401 }
-        );
+        return unauthorizedResponse();
     }
 
     try {
