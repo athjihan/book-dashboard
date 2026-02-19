@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import { Edit } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { CategoryFormPayload, CategoryItem } from "../types/dashboard";
 
-export default function EditCategoryButton({ category }: { category: any }) {
+type EditCategoryButtonProps = {
+    category: Pick<CategoryItem, "id" | "name">;
+    onSubmit: (categoryId: number, data: CategoryFormPayload) => Promise<void>;
+};
+
+export default function EditCategoryButton({ category, onSubmit }: EditCategoryButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -17,24 +21,13 @@ export default function EditCategoryButton({ category }: { category: any }) {
 
         const formData = new FormData(event.currentTarget);
         const data = {
-            id: category.id,
             categoryName: formData.get("categoryName") as string,
         };
 
         try {
-            const response = await fetch("/api/user/categories", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...data, id: category.id }),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Gagal menyimpan kategori");
-            }
+            await onSubmit(category.id, data);
 
             setIsOpen(false);
-            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Terjadi kesalahan");
         } finally {

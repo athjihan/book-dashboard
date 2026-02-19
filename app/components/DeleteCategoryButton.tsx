@@ -2,37 +2,27 @@
 
 import { useState } from "react";
 import { Trash2Icon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { CategoryItem } from "../types/dashboard";
 
-export default function DeleteCategoryButton({ category }: { category: any }) {
+type DeleteCategoryButtonProps = {
+    category: Pick<CategoryItem, "id" | "name">;
+    onSubmit: (categoryId: number) => Promise<void>;
+};
+
+export default function DeleteCategoryButton({ category, onSubmit }: DeleteCategoryButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError("");
         setIsLoading(true);
 
-        const data = {
-            id: category.id,
-        };
-
         try {
-            const response = await fetch("/api/user/categories", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Gagal menghapus kategori");
-            }
+            await onSubmit(category.id);
 
             setIsOpen(false);
-            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Terjadi kesalahan");
         } finally {

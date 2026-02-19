@@ -2,37 +2,27 @@
 
 import { useState } from "react";
 import {  Trash2Icon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { BookItem } from "../types/dashboard";
 
-export default function DeleteBookButton({ book }: { book: any }) {
+type DeleteBookButtonProps = {
+    book: Pick<BookItem, "id" | "title">;
+    onSubmit: (bookId: number) => Promise<void>;
+};
+
+export default function DeleteBookButton({ book, onSubmit }: DeleteBookButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError("");
         setIsLoading(true);
 
-        const data = {
-            id: book.id,
-        };
-
         try {
-            const response = await fetch("/api/user/books", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Gagal menghapus buku");
-            }
+            await onSubmit(book.id);
 
             setIsOpen(false);
-            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Terjadi kesalahan");
         } finally {

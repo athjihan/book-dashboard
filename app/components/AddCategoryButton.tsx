@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { CategoryFormPayload } from "../types/dashboard";
 
-export default function AddCategoryButton() {
+type AddCategoryButtonProps = {
+    onSubmit: (data: CategoryFormPayload) => Promise<void>;
+};
+
+export default function AddCategoryButton({ onSubmit }: AddCategoryButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const router = useRouter();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -21,19 +24,9 @@ export default function AddCategoryButton() {
         };
 
         try {
-            const response = await fetch("/api/user/categories", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Gagal menyimpan kategori");
-            }
+            await onSubmit(data);
 
             setIsOpen(false);
-            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Terjadi kesalahan");
         } finally {

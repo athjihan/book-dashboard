@@ -1,81 +1,196 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import AddBookButton from "../components/AddBookButton";
 import LogoutButton from "../components/LogoutButton";
 import EditBookButton from "../components/EditBookButton";
 import DeleteBookButton from "../components/DeleteBookButton";
 import EditCategoryButton from "../components/EditCategoryButton";
-import DeleteCategoryButton from "../components/DeleteCategoryButton";  
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import DeleteCategoryButton from "../components/DeleteCategoryButton";
 import AddCategoryButton from "../components/AddCategoryButton";
-import { unstable_noStore as noStore } from "next/cache";
-import { headers } from "next/headers";
+import type {
+    BookFormPayload,
+    BookItem,
+    CategoryFormPayload,
+    CategoryItem,
+    PaginatedResponse,
+} from "../types/dashboard";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-type DashboardSearchParams = {
-    bookPage?: string;
-    categoryPage?: string;
-};
-
-type BookItem = {
-    id: number;
-    title: string;
-    author: string;
-    stock: number;
-    updatedAt: string;
-    category: {
-        id: number;
-        name: string;
-    };
-};
-
-type CategoryItem = {
-    id: number;
-    name: string;
-    _count: {
-        books: number;
-    };
-};
-
-type PaginatedResponse<T> = {
-    success: boolean;
-    status: number;
-    message: string;
-    data: T[];
-    meta: {
-        page: number;
-        pageSize: number;
-        total: number;
-        totalPages: number;
-        totalStock?: number;
-    };
-};
-
-export default async function DashboardPage({
-    searchParams,
-}: {
-    searchParams?: Promise<DashboardSearchParams>;
-}) {
-    const resolvedSearchParams = await searchParams;
-    noStore();
-    const session = await getServerSession(authOptions);
-    if (!session) {
-        redirect("/api/auth/signin");
-    }
-
+export default function DashboardPage() {
+    const searchParams = useSearchParams();
     const bookPageSize = 5;
     const categoryPageSize = 5;
-    const bookPage = Math.max(
-        1,
-        Number(resolvedSearchParams?.bookPage ?? "1") || 1
+    const bookPage = useMemo(
+        () => Math.max(1, Number(searchParams.get("bookPage") ?? "1") || 1),
+        [searchParams]
     );
-    const categoryPage = Math.max(
-        1,
-        Number(resolvedSearchParams?.categoryPage ?? "1") || 1
+    const categoryPage = useMemo(
+        () => Math.max(1, Number(searchParams.get("categoryPage") ?? "1") || 1),
+        [searchParams]
     );
+
+    const [books, setBooks] = useState<BookItem[]>([]);
+    const [categories, setCategories] = useState<CategoryItem[]>([]);
+    const [totalBookCount, setTotalBookCount] = useState(0);
+    const [categoryCount, setCategoryCount] = useState(0);
+    const [totalStock, setTotalStock] = useState(0);
+    const [bookTotalPages, setBookTotalPages] = useState(1);
+    const [categoryTotalPages, setCategoryTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [reloadKey, setReloadKey] = useState(0);
+    const hasLoadedOnce = useRef(false);
+
+    const refreshDashboard = () => {
+        setReloadKey((previous) => previous + 1);
+    };
+
+    const handleAddBook = async (data: BookFormPayload) => {
+        const response = await fetch(`/api/user/books`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal menyimpan buku");
+        }
+
+        refreshDashboard();
+    };
+
+    const handleEditBook = async (bookId: number, data: BookFormPayload) => {
+        const response = await fetch(`/api/user/books`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, id: bookId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal memperbarui data buku");
+        }
+
+        refreshDashboard();
+    };
+
+    const handleDeleteBook = async (bookId: number) => {
+        const response = await fetch("/api/user/books", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: bookId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal menghapus buku");
+        }
+
+        refreshDashboard();
+    };
+
+    const handleAddCategory = async (data: CategoryFormPayload) => {
+        const response = await fetch("/api/user/categories", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal menyimpan kategori");
+        }
+
+        refreshDashboard();
+    };
+
+    const handleEditCategory = async (categoryId: number, data: CategoryFormPayload) => {
+        const response = await fetch("/api/user/categories", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, id: categoryId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal menyimpan kategori");
+        }
+
+        refreshDashboard();
+    };
+
+    const handleDeleteCategory = async (categoryId: number) => {
+        const response = await fetch("/api/user/categories", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: categoryId }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal menghapus kategori");
+        }
+
+        refreshDashboard();
+    };
+
+    const fetchDashboardData = useCallback(
+        async (controller: AbortController) => {
+            if (!hasLoadedOnce.current) {
+                setIsLoading(true);
+            }
+            setError(null);
+
+            try {
+                const [booksResponse, categoriesResponse] = await Promise.all([
+                    fetch(`/api/user/books?page=${bookPage}&pageSize=${bookPageSize}`, {
+                        signal: controller.signal,
+                    }),
+                    fetch(`/api/user/categories?page=${categoryPage}&pageSize=${categoryPageSize}`),
+                ]);
+
+                if (!booksResponse.ok || !categoriesResponse.ok) {
+                    throw new Error("Gagal mengambil data dashboard");
+                }
+
+                const booksResult: PaginatedResponse<BookItem> = await booksResponse.json();
+                const categoriesResult: PaginatedResponse<CategoryItem> = await categoriesResponse.json();
+
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                const nextBooks = booksResult.data ?? [];
+                setBooks(nextBooks);
+                setCategories(categoriesResult.data ?? []);
+                setTotalBookCount(booksResult.meta?.total ?? 0);
+                setCategoryCount(categoriesResult.meta?.total ?? 0);
+                setTotalStock(
+                    booksResult.meta?.totalStock ??
+                        nextBooks.reduce((sum, book) => sum + book.stock, 0)
+                );
+                setBookTotalPages(Math.max(1, booksResult.meta?.totalPages ?? 1));
+                setCategoryTotalPages(Math.max(1, categoriesResult.meta?.totalPages ?? 1));
+            } catch {
+                if (!controller.signal.aborted) {
+                    setError("Terjadi kesalahan saat mengambil data dashboard.");
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setIsLoading(false);
+                    hasLoadedOnce.current = true;
+                }
+            }
+        },
+        [bookPage, categoryPage]
+    );
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        fetchDashboardData(controller);
+
+        return () => {
+            controller.abort();
+        };
+    }, [fetchDashboardData, reloadKey]);
 
     const buildHref = (nextBookPage: number, nextCategoryPage: number) =>
         `?bookPage=${nextBookPage}&categoryPage=${nextCategoryPage}`;
@@ -88,54 +203,6 @@ export default async function DashboardPage({
     };
     const dateFormatter = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" });
 
-    const headersList = await headers();
-    const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
-    const protocol = headersList.get("x-forwarded-proto") ?? "http";
-
-    if (!host) {
-        throw new Error("Host header tidak ditemukan");
-    }
-
-    const baseUrl = `${protocol}://${host}`;
-
-    const fetchBooks = async (): Promise<PaginatedResponse<BookItem>> => {
-        const response = await fetch(
-            `${baseUrl}/api/books?page=${bookPage}&pageSize=${bookPageSize}`,
-            { cache: "no-store" }
-        );
-        if (!response.ok) {
-            throw new Error("Gagal mengambil data buku");
-        }
-        return response.json();
-    };
-
-    const fetchCategories = async (): Promise<PaginatedResponse<CategoryItem>> => {
-        const response = await fetch(
-            `${baseUrl}/api/categories?page=${categoryPage}&pageSize=${categoryPageSize}`,
-            { cache: "no-store" }
-        );
-        if (!response.ok) {
-            throw new Error("Gagal mengambil data kategori");
-        }
-        return response.json();
-    };
-
-    const [booksResponse, categoriesResponse] = await Promise.all([
-        fetchBooks(),
-        fetchCategories(),
-    ]);
-
-    const books = booksResponse.data ?? [];
-    const categories = categoriesResponse.data ?? [];
-
-    const totalBookCount = booksResponse.meta?.total ?? 0;
-    const totalStock =
-        booksResponse.meta?.totalStock ??
-        books.reduce((sum, book) => sum + book.stock, 0);
-    const categoryCount = categoriesResponse.meta?.total ?? 0;
-    const bookTotalPages = Math.max(1, booksResponse.meta?.totalPages ?? 1);
-    const categoryTotalPages = Math.max(1, categoriesResponse.meta?.totalPages ?? 1);
-
     return (
         <section className="relative flex min-h-screen flex-col gap-6 bg-zinc-50 px-6 py-10 text-zinc-900">
             <div className="absolute right-6 top-6">
@@ -147,6 +214,12 @@ export default async function DashboardPage({
                 </p>
                 <h1 className="text-3xl font-bold text-zinc-900">Daftar Buku</h1>
             </header>
+
+            {error ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                </div>
+            ) : null}
 
             <div className="grid gap-4 sm:grid-cols-3">
                 <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -168,16 +241,15 @@ export default async function DashboardPage({
                     <p className="mt-2 text-2xl font-semibold text-zinc-900">{totalStock}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <AddBookButton />
-                    <AddCategoryButton />
+                    <AddBookButton onSubmit={handleAddBook} />
+                    <AddCategoryButton onSubmit={handleAddCategory} />
                 </div>
-
             </div>
 
             <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
                 <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
                     <div className="overflow-x-auto">
-                        {books.length === 0 ? (
+                        {!isLoading && books.length === 0 ? (
                             <div className="px-6 py-10 text-sm text-zinc-500">Belum ada data buku.</div>
                         ) : (
                             <table className="w-full min-w-170 border-collapse text-left text-sm">
@@ -205,8 +277,8 @@ export default async function DashboardPage({
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end space-x-2">
-                                                    <EditBookButton book={book} />
-                                                    <DeleteBookButton book={book} />
+                                                    <EditBookButton book={book} onSubmit={handleEditBook} />
+                                                    <DeleteBookButton book={book} onSubmit={handleDeleteBook} />
                                                 </div>
                                             </td>
                                         </tr>
@@ -246,10 +318,7 @@ export default async function DashboardPage({
                                     </Link>
                                 ))}
                                 <Link
-                                    href={buildHref(
-                                        Math.min(bookTotalPages, bookPage + 1),
-                                        categoryPage
-                                    )}
+                                    href={buildHref(Math.min(bookTotalPages, bookPage + 1), categoryPage)}
                                     className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                         bookPage === bookTotalPages
                                             ? "pointer-events-none border-zinc-200 text-zinc-400"
@@ -263,81 +332,76 @@ export default async function DashboardPage({
                     ) : null}
                 </div>
                 <aside className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-                            <div className="border-b border-zinc-200 px-6 py-4">
-                                <h2 className="text-lg font-semibold">Kategori Buku</h2>
+                    <div className="border-b border-zinc-200 px-6 py-4">
+                        <h2 className="text-lg font-semibold">Kategori Buku</h2>
+                    </div>
+                    <div className="px-6 py-4">
+                        {!isLoading && categories.length === 0 ? (
+                            <div className="text-sm text-zinc-500">Belum ada kategori.</div>
+                        ) : (
+                            <ul className="grid gap-3">
+                                {categories.map((category) => (
+                                    <li
+                                        key={category.id}
+                                        className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3"
+                                    >
+                                        <div>
+                                            <p className="text-sm font-semibold text-zinc-900">{category.name}</p>
+                                            <p className="text-xs text-zinc-500">{category._count.books} buku</p>
+                                        </div>
+
+                                        <div className="flex items-center justify-end space-x-2">
+                                            <EditCategoryButton category={category} onSubmit={handleEditCategory} />
+                                            <DeleteCategoryButton category={category} onSubmit={handleDeleteCategory} />
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                    {categories.length > 0 && categoryTotalPages > 1 ? (
+                        <div className="flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-sm text-zinc-600">
+                            <span>
+                                Halaman {categoryPage} dari {categoryTotalPages}
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <Link
+                                    href={buildHref(bookPage, Math.max(1, categoryPage - 1))}
+                                    className={`rounded-full border px-3 py-1 text-sm font-semibold ${
+                                        categoryPage === 1
+                                            ? "pointer-events-none border-zinc-200 text-zinc-400"
+                                            : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
+                                    }`}
+                                >
+                                    Prev
+                                </Link>
+                                {getPageNumbers(categoryPage, categoryTotalPages).map((pageNumber) => (
+                                    <Link
+                                        key={`category-page-${pageNumber}`}
+                                        href={buildHref(bookPage, pageNumber)}
+                                        aria-current={pageNumber === categoryPage ? "page" : undefined}
+                                        className={`rounded-full border px-3 py-1 text-sm font-semibold ${
+                                            pageNumber === categoryPage
+                                                ? "border-zinc-900 bg-zinc-900 text-white"
+                                                : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
+                                        }`}
+                                    >
+                                        {pageNumber}
+                                    </Link>
+                                ))}
+                                <Link
+                                    href={buildHref(bookPage, Math.min(categoryTotalPages, categoryPage + 1))}
+                                    className={`rounded-full border px-3 py-1 text-sm font-semibold ${
+                                        categoryPage === categoryTotalPages
+                                            ? "pointer-events-none border-zinc-200 text-zinc-400"
+                                            : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
+                                    }`}
+                                >
+                                    Next
+                                </Link>
                             </div>
-                            <div className="px-6 py-4">
-                                {categories.length === 0 ? (
-                                    <div className="text-sm text-zinc-500">Belum ada kategori.</div>
-                                ) : (
-                                    <ul className="grid gap-3">
-                                        {categories.map((category) => (
-                                            <li
-                                                key={category.id}
-                                                className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3"
-                                            >
-                                                <div>
-                                                    <p className="text-sm font-semibold text-zinc-900">
-                                                        {category.name}
-                                                    </p>
-                                                    <p className="text-xs text-zinc-500">{category._count.books} buku</p>
-                                                </div>
-                                            
-                                                <div className="flex items-center justify-end space-x-2">
-                                                    <EditCategoryButton category={category} />
-                                                    <DeleteCategoryButton category={category} />
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                            {categories.length > 0 && categoryTotalPages > 1 ? (
-                                <div className="flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-sm text-zinc-600">
-                                    <span>
-                                        Halaman {categoryPage} dari {categoryTotalPages}
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <Link
-                                            href={buildHref(bookPage, Math.max(1, categoryPage - 1))}
-                                            className={`rounded-full border px-3 py-1 text-sm font-semibold ${
-                                                categoryPage === 1
-                                                    ? "pointer-events-none border-zinc-200 text-zinc-400"
-                                                    : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
-                                            }`}
-                                        >
-                                            Prev
-                                        </Link>
-                                        {getPageNumbers(categoryPage, categoryTotalPages).map((pageNumber) => (
-                                            <Link
-                                                key={`category-page-${pageNumber}`}
-                                                href={buildHref(bookPage, pageNumber)}
-                                                aria-current={pageNumber === categoryPage ? "page" : undefined}
-                                                className={`rounded-full border px-3 py-1 text-sm font-semibold ${
-                                                    pageNumber === categoryPage
-                                                        ? "border-zinc-900 bg-zinc-900 text-white"
-                                                        : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
-                                                }`}
-                                            >
-                                                {pageNumber}
-                                            </Link>
-                                        ))}
-                                        <Link
-                                            href={buildHref(
-                                                bookPage,
-                                                Math.min(categoryTotalPages, categoryPage + 1)
-                                            )}
-                                            className={`rounded-full border px-3 py-1 text-sm font-semibold ${
-                                                categoryPage === categoryTotalPages
-                                                    ? "pointer-events-none border-zinc-200 text-zinc-400"
-                                                    : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
-                                            }`}
-                                        >
-                                            Next
-                                        </Link>
-                                    </div>
-                                </div>
-                            ) : null}
+                        </div>
+                    ) : null}
                 </aside>
             </div>
         </section>

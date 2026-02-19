@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { Edit } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { BookCategory, BookFormPayload, BookItem } from "../types/dashboard";
 
-export default function EditBookButton({ book }: { book: any }) {
+type EditBookButtonProps = {
+    book: BookItem;
+    onSubmit: (bookId: number, data: BookFormPayload) => Promise<void>;
+};
+
+export default function EditBookButton({ book, onSubmit }: EditBookButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<BookCategory[]>([]);
     const [isCategoryLoading, setIsCategoryLoading] = useState(false);
     const [categoryError, setCategoryError] = useState("");
     const [error, setError] = useState("");
-    const router = useRouter();
 
     useEffect(() => {
         if (!isOpen) return;
@@ -51,23 +55,13 @@ export default function EditBookButton({ book }: { book: any }) {
             title: formData.get("title") as string,
             author: formData.get("author") as string,
             categoryId: Number(formData.get("categoryId")),
-            stock: formData.get("stock") as string,
+            stock: Number(formData.get("stock")),
         };
 
         try {
-            const response = await fetch("/api/user/books", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...data, id: book.id }),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || "Gagal menyimpan buku");
-            }
+            await onSubmit(book.id, data);
 
             setIsOpen(false);
-            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Terjadi kesalahan");
         } finally {

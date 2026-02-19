@@ -2,21 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import type { BookCategory, BookFormPayload } from "../types/dashboard";
 
-type Category = {
-    id: number;
-    name: string;
+type AddBookButtonProps = {
+    onSubmit: (data: BookFormPayload) => Promise<void>;
 };
 
-export default function AddBookButton() {
+export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categories, setCategories] = useState<BookCategory[]>([]);
     const [isCategoryLoading, setIsCategoryLoading] = useState(false);
     const [categoryError, setCategoryError] = useState("");
-    const router = useRouter();
 
     useEffect(() => {
         if (!isOpen) return;
@@ -57,23 +55,13 @@ export default function AddBookButton() {
             title: formData.get("title") as string,
             author: formData.get("author") as string,
             categoryId: Number(formData.get("categoryId")),
-            stock: formData.get("stock") as string,
+            stock: Number(formData.get("stock")),
         };
 
         try {
-            const response = await fetch(`/api/user/books`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || "Gagal menyimpan buku");
-            }
+            await onSubmit(data);
 
             setIsOpen(false);
-            router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Terjadi kesalahan");
         } finally {
