@@ -1,70 +1,104 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { prisma } from "../lib/prisma";
-import { unstable_noStore as noStore } from "next/cache";
+import { useSearchParams } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-type CatalogSearchParams = {
-    bookPage?: string;
-    categoryPage?: string;
+type Book = {
+    id: number;
+    title: string;
+    author: string;
+    stock: number;
+    updatedAt: string;
+    category: {
+        name: string;
+    } | null;
 };
 
-export default async function PublicBooksPage({
-    searchParams,
-}: {
-    searchParams?: Promise<CatalogSearchParams>;
-}) {
-    const resolvedSearchParams = await searchParams;
-    noStore();
+type Category = {
+    id: number;
+    name: string;
+    _count: {
+        books: number;
+    };
+};
+
+export default function PublicBooksPage() {
+    const searchParams = useSearchParams();
     const bookPageSize = 5;
     const categoryPageSize = 5;
-    const bookPage = Math.max(
-        1,
-        Number(resolvedSearchParams?.bookPage ?? "1") || 1
+    const bookPage = useMemo(
+        () => Math.max(1, Number(searchParams.get("bookPage") ?? "1") || 1),
+        [searchParams]
     );
-    const categoryPage = Math.max(
-        1,
-        Number(resolvedSearchParams?.categoryPage ?? "1") || 1
+    const categoryPage = useMemo(
+        () => Math.max(1, Number(searchParams.get("categoryPage") ?? "1") || 1),
+        [searchParams]
     );
 
-    const [books, booksTotal, categories, categoriesTotal, stockAggregate] =
-        await Promise.all([
-            prisma.book.findMany({
-                where: { deletedAt: null },
-                include: { category: true },
-                orderBy: { createdAt: "desc" },
-                skip: (bookPage - 1) * bookPageSize,
-                take: bookPageSize,
-            }),
-            prisma.book.count({ where: { deletedAt: null } }),
-            prisma.category.findMany({
-                where: { deletedAt: null },
-                include: {
-                    _count: {
-                        select: {
-                            books: {
-                                where: { deletedAt: null },
-                            },
-                        },
-                    },
-                },
-                orderBy: { name: "asc" },
-                skip: (categoryPage - 1) * categoryPageSize,
-                take: categoryPageSize,
-            }),
-            prisma.category.count({ where: { deletedAt: null } }),
-            prisma.book.aggregate({ where: { deletedAt: null }, _sum: { stock: true } }),
-        ]);
+    const [books, setBooks] = useState<Book[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [totalBookCount, setTotalBookCount] = useState(0);
+    const [totalCategoryCount, setTotalCategoryCount] = useState(0);
+    const [totalStock, setTotalStock] = useState(0);
+    const [bookTotalPages, setBookTotalPages] = useState(1);
+    const [categoryTotalPages, setCategoryTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const hasLoadedOnce = useRef(false);
 
-    const totalStock = stockAggregate._sum.stock ?? 0;
-    const totalBookCount = booksTotal;
-    const totalCategoryCount = categoriesTotal;
-    const bookTotalPages = Math.max(1, Math.ceil(booksTotal / bookPageSize));
-    const categoryTotalPages = Math.max(
-        1,
-        Math.ceil(categoriesTotal / categoryPageSize)
-    );
+    useEffect(() => {
+        const controller = new AbortController();
+
+        const fetchCatalogData = async () => {
+            if (!hasLoadedOnce.current) {
+                setIsLoading(true);
+            }
+            setError(null);
+
+            try {
+                const [booksResponse, categoriesResponse] = await Promise.all([
+                    fetch(`/api/books?page=${bookPage}&pageSize=${bookPageSize}`, { signal: controller.signal }),
+                    fetch(`/api/categories?page=${categoryPage}&pageSize=${categoryPageSize}`),
+                ]);
+
+                if (!booksResponse.ok || !categoriesResponse.ok) {
+                    throw new Error("Gagal memuat data katalog");
+                }
+
+                const booksResult = await booksResponse.json();
+                const categoriesResult = await categoriesResponse.json();
+
+                if (controller.signal.aborted) {
+                    return;
+                }
+
+                setBooks(booksResult.data ?? []);
+                setCategories(categoriesResult.data ?? []);
+                setTotalBookCount(booksResult.meta?.total ?? 0);
+                setTotalCategoryCount(categoriesResult.meta?.total ?? 0);
+                setTotalStock(booksResult.meta?.totalStock ?? 0);
+                setBookTotalPages(booksResult.meta?.totalPages ?? 1);
+                setCategoryTotalPages(categoriesResult.meta?.totalPages ?? 1);
+            } catch (err) {
+                if (!controller.signal.aborted) {
+                    setError("Terjadi kesalahan saat mengambil data katalog.");
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setIsLoading(false);
+                    hasLoadedOnce.current = true;
+                }
+            }
+        };
+
+        fetchCatalogData();
+
+        return () => {
+            controller.abort();
+        };
+    }, [bookPage, categoryPage]);
+
     const buildHref = (nextBookPage: number, nextCategoryPage: number) =>
         `?bookPage=${nextBookPage}&categoryPage=${nextCategoryPage}`;
     const getPageNumbers = (current: number, total: number) => {
@@ -111,7 +145,6 @@ export default async function PublicBooksPage({
                         <p className="mt-2 text-2xl font-semibold text-zinc-900">{totalStock}</p>
                     </div>
                 </div>
-
                 <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
                     <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
                         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
@@ -141,7 +174,7 @@ export default async function PublicBooksPage({
                                                     {book.stock}
                                                 </td>
                                                 <td className="px-6 py-4 text-zinc-600">
-                                                    {dateFormatter.format(book.updatedAt)}
+                                                    {dateFormatter.format(new Date(book.updatedAt))}
                                                 </td>
                                             </tr>
                                         ))}
