@@ -20,7 +20,7 @@ export default function EditBookButton({ book }: { book: any }) {
                 setCategoryError("");
     
                 try {
-                    const response = await fetch(`/api/categories`, {
+                    const response = await fetch(`/api/user/categories`, {
                         method: "GET",
                         cache: "no-store",
                     });
@@ -55,7 +55,7 @@ export default function EditBookButton({ book }: { book: any }) {
         };
 
         try {
-            const response = await fetch("/api/books", {
+            const response = await fetch("/api/user/books", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...data, id: book.id }),
@@ -138,14 +138,14 @@ export default function EditBookButton({ book }: { book: any }) {
                                     required
                                     className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:border-green-600 focus:outline-none"
                                     disabled={isCategoryLoading || categories.length === 0}
-                                    defaultValue={book.category.id}
+                                    defaultValue={book.category?.id || ""}
                                 >
                                     <option value="" disabled>
                                         {isCategoryLoading ? "Memuat kategori..." : "Pilih kategori"}
                                     </option>
                                     {categories.map((category) => (
                                         <option key={category.id} value={category.id}>
-                                            {category.name}
+                                            {category?.name}
                                         </option>
                                     ))}
                                 </select>

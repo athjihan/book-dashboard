@@ -196,7 +196,7 @@ export default async function DashboardPage({
                                         <tr key={book.id} className="border-t border-zinc-200">
                                             <td className="px-6 py-4 font-medium text-zinc-900">{book.title}</td>
                                             <td className="px-6 py-4 text-zinc-600">{book.author}</td>
-                                            <td className="px-6 py-4 text-zinc-600">{book.category.name}</td>
+                                            <td className="px-6 py-4 text-zinc-600">{book.category?.name || "-"}</td>
                                             <td className="px-6 py-4 text-right font-semibold text-zinc-900">
                                                 {book.stock}
                                             </td>

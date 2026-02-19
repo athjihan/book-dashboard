@@ -35,7 +35,15 @@ export async function GET(request: NextRequest) {
         const [categories, total] = await Promise.all([
         prisma.category.findMany({
             where: { deletedAt: null },
-            include: { _count: { select: { books: true } } },
+            include: {
+                _count: {
+                    select: {
+                        books: {
+                            where: { deletedAt: null },
+                        },
+                    },
+                },
+            },
             orderBy: { name: "asc" },
             skip: (page - 1) * pageSize,
             take: pageSize,
@@ -146,6 +154,11 @@ export async function PUT(request: NextRequest) {
             data: { name: categoryName },
         });
 
+        await prisma.book.updateMany({
+            where: { categoryId: category.id },
+            data: { categoryId: category.id},
+        });
+
         return NextResponse.json(
             { 
                 success: true, 
@@ -189,9 +202,16 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        await prisma.category.update({
-            where: { id },
-            data: { deletedAt: new Date() },
+        await prisma.$transaction(async (tx) => {
+            await tx.category.update({
+                where: { id, deletedAt: null },
+                data: { deletedAt: new Date() },
+            });
+
+            await tx.book.updateMany({
+                where: { categoryId: id },
+                data: { categoryId: null },
+            });
         });
 
         return NextResponse.json(

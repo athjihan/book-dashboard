@@ -46,8 +46,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const normalizedCategoryId = Number(categoryId);
         let category = await prisma.category.findFirst({
-            where: { id: categoryId },
+            where: { id: normalizedCategoryId, deletedAt: null },
         });
 
         if (!category) {
@@ -218,8 +219,9 @@ export async function PUT(request: NextRequest) {
             );
         }
 
+        const normalizedCategoryId = Number(categoryId);
         let category = await prisma.category.findFirst({
-            where: { id: categoryId },
+            where: { id: normalizedCategoryId, deletedAt: null },
         });
 
         if (!category) {

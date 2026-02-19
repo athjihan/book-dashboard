@@ -17,7 +17,15 @@ export async function GET(request: NextRequest) {
     const [categories, total] = await Promise.all([
         prisma.category.findMany({
             where: { deletedAt: null },
-            include: { _count: { select: { books: true } } },
+            include: {
+                _count: {
+                    select: {
+                        books: {
+                            where: { deletedAt: null },
+                        },
+                    },
+                },
+            },
             orderBy: { name: "asc" },
             skip: (page - 1) * pageSize,
             take: pageSize,

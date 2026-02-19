@@ -26,7 +26,7 @@ export default function AddBookButton() {
             setCategoryError("");
 
             try {
-                const response = await fetch(`/api/categories`, {
+                const response = await fetch(`/api/user/categories`, {
                     method: "GET",
                     cache: "no-store",
                 });
@@ -61,7 +61,7 @@ export default function AddBookButton() {
         };
 
         try {
-            const response = await fetch(`/api/books`, {
+            const response = await fetch(`/api/user/books`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
@@ -109,6 +109,7 @@ export default function AddBookButton() {
                         <form
                             className="mt-6 grid gap-4"
                             onSubmit={handleSubmit}
+                            autoComplete="off"
                         >
                             {error && (
                                 <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">

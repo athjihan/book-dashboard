@@ -20,7 +20,7 @@ export default function DeleteCategoryButton({ category }: { category: any }) {
         };
 
         try {
-            const response = await fetch("/api/categories", {
+            const response = await fetch("/api/user/categories", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),

@@ -31,20 +31,30 @@ export default async function PublicBooksPage({
     const [books, booksTotal, categories, categoriesTotal, stockAggregate] =
         await Promise.all([
             prisma.book.findMany({
+                where: { deletedAt: null },
                 include: { category: true },
                 orderBy: { createdAt: "desc" },
                 skip: (bookPage - 1) * bookPageSize,
                 take: bookPageSize,
             }),
-            prisma.book.count(),
+            prisma.book.count({ where: { deletedAt: null } }),
             prisma.category.findMany({
-                include: { _count: { select: { books: true } } },
+                where: { deletedAt: null },
+                include: {
+                    _count: {
+                        select: {
+                            books: {
+                                where: { deletedAt: null },
+                            },
+                        },
+                    },
+                },
                 orderBy: { name: "asc" },
                 skip: (categoryPage - 1) * categoryPageSize,
                 take: categoryPageSize,
             }),
-            prisma.category.count(),
-            prisma.book.aggregate({ _sum: { stock: true } }),
+            prisma.category.count({ where: { deletedAt: null } }),
+            prisma.book.aggregate({ where: { deletedAt: null }, _sum: { stock: true } }),
         ]);
 
     const totalStock = stockAggregate._sum.stock ?? 0;
@@ -126,7 +136,7 @@ export default async function PublicBooksPage({
                                             <tr key={book.id} className="border-t border-zinc-200">
                                                 <td className="px-6 py-4 font-medium text-zinc-900">{book.title}</td>
                                                 <td className="px-6 py-4 text-zinc-600">{book.author}</td>
-                                                <td className="px-6 py-4 text-zinc-600">{book.category.name}</td>
+                                                <td className="px-6 py-4 text-zinc-600">{book.category?.name}</td>
                                                 <td className="px-6 py-4 text-right font-semibold text-zinc-900">
                                                     {book.stock}
                                                 </td>

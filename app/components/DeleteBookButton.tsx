@@ -20,7 +20,7 @@ export default function DeleteBookButton({ book }: { book: any }) {
         };
 
         try {
-            const response = await fetch("/api/books", {
+            const response = await fetch("/api/user/books", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),

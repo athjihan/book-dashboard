@@ -22,7 +22,7 @@ export default function EditCategoryButton({ category }: { category: any }) {
         };
 
         try {
-            const response = await fetch("/api/categories", {
+            const response = await fetch("/api/user/categories", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...data, id: category.id }),
