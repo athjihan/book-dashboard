@@ -35,12 +35,8 @@ export default function PublicBooksPage() {
     const [totalStock, setTotalStock] = useState(0);
     const [bookTotalPages, setBookTotalPages] = useState(1);
     const [categoryTotalPages, setCategoryTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     const fetchCatalogData = async (controller: AbortController) => {
-        setIsLoading(true);
-        setError(null);
             try {
                 const [booksResponse, categoriesResponse] = await Promise.all([
                     fetch(`/api/books?page=${bookPage}&pageSize=${bookPageSize}`, { signal: controller.signal }),
@@ -68,13 +64,9 @@ export default function PublicBooksPage() {
                 setBookTotalPages(booksResult.meta?.totalPages ?? 1);
                 setCategoryTotalPages(categoriesResult.meta?.totalPages ?? 1);
             } catch (err) {
-                if (!controller.signal.aborted) {
-                    setError("Terjadi kesalahan saat mengambil data katalog.");
-                }
+                console.error("Error fetching catalog data:", err);
             } finally {
-                if (!controller.signal.aborted) {
-                    setIsLoading(false);
-                }
+                console.log("Finished fetching catalog data");
             }
         };
 

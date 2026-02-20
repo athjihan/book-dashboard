@@ -57,20 +57,13 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }: any) {
           if (user) {
             token.id = user.id;
+            token.email = user.email;
           }
           return token;
         },
         async session({ session, token }: any) {
-          if (token) {
-            const jwtToken = jwt.sign(
-              { id: token.id },
-              process.env.JWT_SECRET || "admin-secret-key",
-              { expiresIn: "30d" }
-            );
-            session.data = {
-              token: jwtToken,
-            };
-          }
+         session.user.id = token.id;
+         session.user.email = token.email;
           return session;
         },
       },
