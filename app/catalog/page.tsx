@@ -27,15 +27,17 @@ export default function PublicBooksPage() {
     const searchParams = useSearchParams();
     const bookPageSize = 5;
     const categoryPageSize = 5;
-    const bookPage = useMemo(
-        () => Math.max(1, Number(searchParams.get("bookPage") ?? "1") || 1),
-        [searchParams]
-    );
-    const categoryPage = useMemo(
-        () => Math.max(1, Number(searchParams.get("categoryPage") ?? "1") || 1),
-        [searchParams]
-    );
+    // const bookPage = useMemo(
+    //     () => Math.max(1, Number(searchParams.get("bookPage") ?? "1") || 1),
+    //     [searchParams]
+    // );
+    // const categoryPage = useMemo(
+    //     () => Math.max(1, Number(searchParams.get("categoryPage") ?? "1") || 1),
+    //     [searchParams]
+    // );
 
+    const [bookPage, setBookPage] = useState(1);
+    const [categoryPage, setCategoryPage] = useState(1);
     const [books, setBooks] = useState<Book[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [totalBookCount, setTotalBookCount] = useState(0);
@@ -45,17 +47,11 @@ export default function PublicBooksPage() {
     const [categoryTotalPages, setCategoryTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const hasLoadedOnce = useRef(false);
 
-    useEffect(() => {
+    const fetchCatalogData = async () => {
         const controller = new AbortController();
-
-        const fetchCatalogData = async () => {
-            if (!hasLoadedOnce.current) {
-                setIsLoading(true);
-            }
-            setError(null);
-
+        setIsLoading(true);
+        setError(null);
             try {
                 const [booksResponse, categoriesResponse] = await Promise.all([
                     fetch(`/api/books?page=${bookPage}&pageSize=${bookPageSize}`, { signal: controller.signal }),
@@ -87,16 +83,15 @@ export default function PublicBooksPage() {
             } finally {
                 if (!controller.signal.aborted) {
                     setIsLoading(false);
-                    hasLoadedOnce.current = true;
                 }
+                return () => {
+                    controller.abort();
+                };
             }
         };
 
+    useEffect(() => {
         fetchCatalogData();
-
-        return () => {
-            controller.abort();
-        };
     }, [bookPage, categoryPage]);
 
     const buildHref = (nextBookPage: number, nextCategoryPage: number) =>

@@ -40,99 +40,119 @@ export default function DashboardPage() {
     const [categoryTotalPages, setCategoryTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [reloadKey, setReloadKey] = useState(0);
     const hasLoadedOnce = useRef(false);
 
-    const refreshDashboard = () => {
-        setReloadKey((previous) => previous + 1);
-    };
 
     const handleAddBook = async (data: BookFormPayload) => {
-        const response = await fetch(`/api/user/books`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-            throw new Error("Gagal menyimpan buku");
+        try {
+            const response = await fetch(`/api/user/books`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });   
+            if (!response.ok) {
+                throw new Error("Gagal menyimpan buku");
+            }         
+            
+            fetchDashboardData();
+        } catch (error) {
+            setError("Gagal menyimpan buku");
         }
-
-        refreshDashboard();
     };
 
     const handleEditBook = async (bookId: number, data: BookFormPayload) => {
-        const response = await fetch(`/api/user/books`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...data, id: bookId }),
-        });
+        try {
+            const response = await fetch(`/api/user/books`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...data, id: bookId }),
+            });
 
-        if (!response.ok) {
-            throw new Error("Gagal memperbarui data buku");
+            if (!response.ok) {
+                throw new Error("Gagal memperbarui data buku");
+            }
+
+            fetchDashboardData();            
+        } catch (error) {
+            setError("Gagal memperbarui buku");
         }
-
-        refreshDashboard();
     };
 
     const handleDeleteBook = async (bookId: number) => {
-        const response = await fetch("/api/user/books", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: bookId }),
-        });
+        try {
+            const response = await fetch("/api/user/books", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: bookId }),
+            });
 
-        if (!response.ok) {
-            throw new Error("Gagal menghapus buku");
+            if (!response.ok) {
+                throw new Error("Gagal menghapus buku");
+            }
+
+            fetchDashboardData();           
+        } catch (error) {
+            setError("Gagal menghapus buku");
         }
-
-        refreshDashboard();
     };
 
     const handleAddCategory = async (data: CategoryFormPayload) => {
-        const response = await fetch("/api/user/categories", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
+        try {
+            const response = await fetch("/api/user/categories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
 
-        if (!response.ok) {
-            throw new Error("Gagal menyimpan kategori");
+            if (!response.ok) {
+                throw new Error("Gagal menyimpan kategori");
+            }
+
+            fetchDashboardData();            
+        } catch (error) {
+            setError("Gagal menyimpan kategori");
         }
-
-        refreshDashboard();
     };
 
     const handleEditCategory = async (categoryId: number, data: CategoryFormPayload) => {
-        const response = await fetch("/api/user/categories", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...data, id: categoryId }),
-        });
+        try {
+            const response = await fetch("/api/user/categories", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...data, id: categoryId }),
+            });
 
-        if (!response.ok) {
-            throw new Error("Gagal menyimpan kategori");
+            if (!response.ok) {
+                throw new Error("Gagal menyimpan kategori");
+            }
+
+            fetchDashboardData();            
+        } catch (error) {
+            setError("Gagal memperbarui kategori");
         }
-
-        refreshDashboard();
     };
 
     const handleDeleteCategory = async (categoryId: number) => {
-        const response = await fetch("/api/user/categories", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: categoryId }),
-        });
+        try {
+            const response = await fetch("/api/user/categories", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: categoryId }),
+            });
 
-        if (!response.ok) {
-            throw new Error("Gagal menghapus kategori");
+            if (!response.ok) {
+                throw new Error("Gagal menghapus kategori");
+            }
+
+            fetchDashboardData();            
+        } catch (error) {
+            setError("Gagal menghapus kategori");
         }
-
-        refreshDashboard();
     };
 
-    const fetchDashboardData = useCallback(
-        async (controller: AbortController) => {
+    const fetchDashboardData = async (
+    ) => {
+        const controller = new AbortController();
             if (!hasLoadedOnce.current) {
                 setIsLoading(true);
             }
@@ -177,20 +197,15 @@ export default function DashboardPage() {
                     setIsLoading(false);
                     hasLoadedOnce.current = true;
                 }
-            }
-        },
-        [bookPage, categoryPage]
-    );
-
-    useEffect(() => {
-        const controller = new AbortController();
-
-        fetchDashboardData(controller);
-
-        return () => {
+                return () => {
             controller.abort();
         };
-    }, [fetchDashboardData, reloadKey]);
+            }
+        };
+
+    useEffect(() => {
+        fetchDashboardData();    
+    }, [bookPage, categoryPage]);
 
     const buildHref = (nextBookPage: number, nextCategoryPage: number) =>
         `?bookPage=${nextBookPage}&categoryPage=${nextCategoryPage}`;

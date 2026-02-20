@@ -12,22 +12,13 @@ type DeleteCategoryButtonProps = {
 export default function DeleteCategoryButton({ category, onSubmit }: DeleteCategoryButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError("");
         setIsLoading(true);
 
-        try {
-            await onSubmit(category.id);
-
-            setIsOpen(false);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        } finally {
-            setIsLoading(false);
-        }
+        await onSubmit(category.id).finally(() => setIsLoading(false));
+        setIsOpen(false);
     };
 
     return (
@@ -59,11 +50,6 @@ export default function DeleteCategoryButton({ category, onSubmit }: DeleteCateg
                             className="mt-6 grid gap-4"
                             onSubmit={handleSubmit}
                         >
-                            {error && (
-                                <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-                                    {error}
-                                </div>
-                            )}
                             <label className="grid gap-2 text-sm font-medium text-zinc-700">
                                 Apakah Anda yakin ingin menghapus kategori <span className="font-semibold">{category.name}?</span>
                             </label>

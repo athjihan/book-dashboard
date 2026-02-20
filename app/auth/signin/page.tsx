@@ -2,12 +2,14 @@
 
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { NextResponse } from "next/server";
 
 export default function SignInPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const errorParam = searchParams.get("error");
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,24 +19,36 @@ export default function SignInPage() {
   );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
+    try {
+      event.preventDefault();
+      setIsSubmitting(true);
+      setErrorMessage(null);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      callbackUrl,
-      redirect: false,
-    });
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl,
+        redirect: false,
+      });
 
-    if (result?.error) {
-      setErrorMessage("Email atau password salah.");
-      setIsSubmitting(false);
-      return;
+      if (result?.error) {
+        setErrorMessage("Email atau password salah.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      router.push(callbackUrl);
+    } catch (error) {
+        console.error("Error signing in:", error);
+        return NextResponse.json(
+            { 
+                success: false, 
+                status: 500, 
+                message: "Internal server error" 
+            },
+            { status: 500 }
+        );
     }
-
-    window.location.href = result?.url ?? callbackUrl;
   }
 
   return (

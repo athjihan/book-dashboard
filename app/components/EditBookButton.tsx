@@ -15,7 +15,6 @@ export default function EditBookButton({ book, onSubmit }: EditBookButtonProps) 
     const [categories, setCategories] = useState<BookCategory[]>([]);
     const [isCategoryLoading, setIsCategoryLoading] = useState(false);
     const [categoryError, setCategoryError] = useState("");
-    const [error, setError] = useState("");
 
     useEffect(() => {
         if (!isOpen) return;
@@ -47,7 +46,6 @@ export default function EditBookButton({ book, onSubmit }: EditBookButtonProps) 
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError("");
         setIsLoading(true);
 
         const formData = new FormData(event.currentTarget);
@@ -58,15 +56,8 @@ export default function EditBookButton({ book, onSubmit }: EditBookButtonProps) 
             stock: Number(formData.get("stock")),
         };
 
-        try {
-            await onSubmit(book.id, data);
-
-            setIsOpen(false);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        } finally {
-            setIsLoading(false);
-        }
+        await onSubmit(book.id, data).finally(() => setIsLoading(false));
+        setIsOpen(false);
     };
 
     return (
@@ -98,11 +89,6 @@ export default function EditBookButton({ book, onSubmit }: EditBookButtonProps) 
                             className="mt-6 grid gap-4"
                             onSubmit={handleSubmit}
                         >
-                            {error && (
-                                <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-                                    {error}
-                                </div>
-                            )}
                             <label className="grid gap-2 text-sm font-medium text-zinc-700">
                                 Judul Buku
                                 <input

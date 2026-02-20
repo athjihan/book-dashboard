@@ -12,22 +12,13 @@ type DeleteBookButtonProps = {
 export default function DeleteBookButton({ book, onSubmit }: DeleteBookButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError("");
         setIsLoading(true);
 
-        try {
-            await onSubmit(book.id);
-
-            setIsOpen(false);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        } finally {
-            setIsLoading(false);
-        }
+        await onSubmit(book.id).finally(() => setIsLoading(false));
+        setIsOpen(false);
     };
 
     return (
@@ -59,11 +50,6 @@ export default function DeleteBookButton({ book, onSubmit }: DeleteBookButtonPro
                             className="mt-6 grid gap-4"
                             onSubmit={handleSubmit}
                         >
-                            {error && (
-                                <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-                                    {error}
-                                </div>
-                            )}
                             <label className="grid gap-2 text-sm font-medium text-zinc-700">
                                 Apakah Anda yakin ingin menghapus buku <span className="font-semibold">{book.title}?</span>
                             </label>

@@ -1,37 +1,7 @@
-import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../app/generated/prisma/client";
-import * as bcrypt from "bcryptjs";
+import { PrismaClient } from "../../app/generated/prisma/client";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
-
-async function main() {
-    console.log("Start seeding...");
-
-    const hashedPassword = await bcrypt.hash("password123", 10);
-
-    const admin = await prisma.user.create({
-        data: {
-            email: "admin@local.com",
-            name: "Admin Perpustakaan",
-            password: hashedPassword,
-        },
-    });
-    console.log(`Created user: ${admin.email}`);
-
-    await prisma.category.createMany({
-        data: [
-            { name: "Fiksi & Sastra" },
-            { name: "Teknologi & Komputer" },
-            { name: "Pengembangan Diri" },
-        ],
-    });
-
-    console.log("Created categories.");
-
-    await prisma.book.createMany({
-        data: [
+export async function bookSeeder(prisma: PrismaClient) {
+    const data = [
             {
                 title: "Laskar Pelangi",
                 author: "Andrea Hirata",
@@ -74,17 +44,11 @@ async function main() {
                 stock: 7,
                 categoryId: 7,
             },
-        ],
-    });
+        ];
 
-    console.log("Seeding finished.");
+    console.log("Seeding books...");
+    await prisma.book.createMany({
+        data,
+        skipDuplicates: true,
+    });
 }
-
-main()
-    .catch((e) => {
-        console.error(e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });

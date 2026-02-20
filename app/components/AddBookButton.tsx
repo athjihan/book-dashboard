@@ -11,7 +11,6 @@ type AddBookButtonProps = {
 export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
     const [categories, setCategories] = useState<BookCategory[]>([]);
     const [isCategoryLoading, setIsCategoryLoading] = useState(false);
     const [categoryError, setCategoryError] = useState("");
@@ -47,7 +46,6 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError("");
         setIsLoading(true);
 
         const formData = new FormData(event.currentTarget);
@@ -58,15 +56,8 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
             stock: Number(formData.get("stock")),
         };
 
-        try {
-            await onSubmit(data);
-
-            setIsOpen(false);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Terjadi kesalahan");
-        } finally {
-            setIsLoading(false);
-        }
+        await onSubmit(data).finally(() => setIsLoading(false));
+        setIsOpen(false);
     };
 
     return (
@@ -99,11 +90,6 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                             onSubmit={handleSubmit}
                             autoComplete="off"
                         >
-                            {error && (
-                                <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-                                    {error}
-                                </div>
-                            )}
                             <label className="grid gap-2 text-sm font-medium text-zinc-700">
                                 Judul Buku
                                 <input

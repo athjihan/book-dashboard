@@ -6,11 +6,8 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 
 function getPaginationParams(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
-    const pageSize = Math.min(
-        100,
-        Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10)
-    );
+    const page = Number(searchParams.get("page") ?? "1");
+    const pageSize = Number(searchParams.get("pageSize") ?? "10");
 
     return { page, pageSize };
 }
@@ -55,10 +52,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { 
                     success: false, 
-                    status: 400, 
-                    message: "Category does not exist" 
+                    status: 404, 
+                    message: "Category not found" 
                 },
-                { status: 400 }
+                { status: 404 }
             );
         }
 
@@ -75,11 +72,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             { 
                 success: true, 
-                status: 200, 
+                status: 201, 
                 message: "Book created successfully", 
                 book 
             }, 
-            { status: 200 },
+            { status: 201 },
         );
     } catch (error) {
         console.error("Error creating book:", error);
@@ -87,7 +84,7 @@ export async function POST(request: NextRequest) {
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to create book" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );
@@ -119,32 +116,32 @@ export async function GET(request: NextRequest) {
             }),
         ]);
 
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const totalStock = stockAggregate._sum.stock ?? 0;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const totalStock = stockAggregate._sum.stock ?? 0;
 
-    return NextResponse.json(
-        {
-            success: true,
-            status: 200,
-            message: "Books fetched successfully",
-            data: books,
-            meta: {
-                page,
-                pageSize,
-                total,
-                totalPages,
-                totalStock,
+        return NextResponse.json(
+            {
+                success: true,
+                status: 200,
+                message: "Books fetched successfully",
+                data: books,
+                meta: {
+                    page,
+                    pageSize,
+                    total,
+                    totalPages,
+                    totalStock,
+                },
             },
-        },
-        { status: 200 }
-    );
+            { status: 200 }
+        );
     } catch (error) {
         console.error("Error fetching books for admin:", error);
         return NextResponse.json(
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to fetch books" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );
@@ -191,7 +188,7 @@ export async function DELETE(request: NextRequest) {
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to delete book" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );
@@ -228,10 +225,10 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json(
                 { 
                     success: false, 
-                    status: 400, 
-                    message: "Invalid category id" 
+                    status: 404, 
+                    message: "Category not found" 
                 },
-                { status: 400 }
+                { status: 404 }
             );
         }
 
@@ -261,7 +258,7 @@ export async function PUT(request: NextRequest) {
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to update book" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );

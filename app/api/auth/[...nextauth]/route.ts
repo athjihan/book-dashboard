@@ -24,12 +24,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing required fields");
         }
 
-        const admin = await prisma.user.findFirst({
+        const admin = await prisma.user.findUnique({
           where: {
-            email: {
-              equals: credentials.email,
-              mode: "insensitive",
-            },
+            email: credentials.email,
           },
         });
 

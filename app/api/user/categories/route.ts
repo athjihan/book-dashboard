@@ -5,12 +5,8 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 
 function getPaginationParams(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
-    const pageSize = Math.min(
-        100,
-        Math.max(1, Number(searchParams.get("pageSize") ?? "10") || 10)
-    );
-
+    const page = Number(searchParams.get("page") ?? "1");
+    const pageSize = Number(searchParams.get("pageSize") ?? "10");
     return { page, pageSize };
 }
 
@@ -73,7 +69,7 @@ export async function GET(request: NextRequest) {
             {
                 success: false,
                 status: 500,
-                message: "Failed to fetch categories",
+                message: "Internal server error",
             },
             { status: 500 }
         );
@@ -109,11 +105,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             { 
                 success: true, 
-                status: 200, 
+                status: 201, 
                 message: "Category created successfully", 
                 category 
             },
-            { status: 200 }
+            { status: 201 }
         );
     } catch (error) {
         console.error("Error creating category:", error);
@@ -121,7 +117,7 @@ export async function POST(request: NextRequest) {
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to create category" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );
@@ -154,11 +150,6 @@ export async function PUT(request: NextRequest) {
             data: { name: categoryName },
         });
 
-        await prisma.book.updateMany({
-            where: { categoryId: category.id },
-            data: { categoryId: category.id},
-        });
-
         return NextResponse.json(
             { 
                 success: true, 
@@ -174,7 +165,7 @@ export async function PUT(request: NextRequest) {
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to update category" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );
@@ -228,7 +219,7 @@ export async function DELETE(request: NextRequest) {
             { 
                 success: false, 
                 status: 500, 
-                message: "Failed to delete category" 
+                message: "Internal server error" 
             },
             { status: 500 }
         );
