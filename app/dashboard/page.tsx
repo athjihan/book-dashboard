@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import AddBookButton from "../components/AddBookButton";
 import LogoutButton from "../components/LogoutButton";
 import EditBookButton from "../components/EditBookButton";
@@ -19,17 +17,10 @@ import type {
 } from "../types/dashboard";
 
 export default function DashboardPage() {
-    const searchParams = useSearchParams();
     const bookPageSize = 5;
     const categoryPageSize = 5;
-    const bookPage = useMemo(
-        () => Math.max(1, Number(searchParams.get("bookPage") ?? "1") || 1),
-        [searchParams]
-    );
-    const categoryPage = useMemo(
-        () => Math.max(1, Number(searchParams.get("categoryPage") ?? "1") || 1),
-        [searchParams]
-    );
+    const [bookPage, setBookPage] = useState(1);
+    const [categoryPage, setCategoryPage] = useState(1);
 
     const [books, setBooks] = useState<BookItem[]>([]);
     const [categories, setCategories] = useState<CategoryItem[]>([]);
@@ -40,8 +31,6 @@ export default function DashboardPage() {
     const [categoryTotalPages, setCategoryTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const hasLoadedOnce = useRef(false);
-
 
     const handleAddBook = async (data: BookFormPayload) => {
         try {
@@ -90,7 +79,8 @@ export default function DashboardPage() {
                 throw new Error("Gagal menghapus buku");
             }
 
-            fetchDashboardData();           
+            fetchDashboardData();       
+            setBookPage(1);   
         } catch (error) {
             setError("Gagal menghapus buku");
         }
@@ -144,7 +134,8 @@ export default function DashboardPage() {
                 throw new Error("Gagal menghapus kategori");
             }
 
-            fetchDashboardData();            
+            fetchDashboardData();    
+            setCategoryPage(1);        
         } catch (error) {
             setError("Gagal menghapus kategori");
         }
@@ -153,9 +144,7 @@ export default function DashboardPage() {
     const fetchDashboardData = async (
     ) => {
         const controller = new AbortController();
-            if (!hasLoadedOnce.current) {
-                setIsLoading(true);
-            }
+            setIsLoading(true);
             setError(null);
 
             try {
@@ -195,7 +184,6 @@ export default function DashboardPage() {
             } finally {
                 if (!controller.signal.aborted) {
                     setIsLoading(false);
-                    hasLoadedOnce.current = true;
                 }
                 return () => {
             controller.abort();
@@ -205,10 +193,9 @@ export default function DashboardPage() {
 
     useEffect(() => {
         fetchDashboardData();    
+
     }, [bookPage, categoryPage]);
 
-    const buildHref = (nextBookPage: number, nextCategoryPage: number) =>
-        `?bookPage=${nextBookPage}&categoryPage=${nextCategoryPage}`;
     const getPageNumbers = (current: number, total: number) => {
         const maxButtons = 5;
         const start = Math.max(1, Math.min(current - 2, total - maxButtons + 1));
@@ -308,8 +295,8 @@ export default function DashboardPage() {
                                 Halaman {bookPage} dari {bookTotalPages}
                             </span>
                             <div className="flex items-center gap-2">
-                                <Link
-                                    href={buildHref(Math.max(1, bookPage - 1), categoryPage)}
+                                <button
+                                    onClick={() => setBookPage((prev) => prev-1)}
                                     className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                         bookPage === 1
                                             ? "pointer-events-none border-zinc-200 text-zinc-400"
@@ -317,11 +304,11 @@ export default function DashboardPage() {
                                     }`}
                                 >
                                     Prev
-                                </Link>
+                                </button>
                                 {getPageNumbers(bookPage, bookTotalPages).map((pageNumber) => (
-                                    <Link
+                                    <button
                                         key={`book-page-${pageNumber}`}
-                                        href={buildHref(pageNumber, categoryPage)}
+                                        onClick={() => setBookPage(pageNumber)}
                                         aria-current={pageNumber === bookPage ? "page" : undefined}
                                         className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                             pageNumber === bookPage
@@ -330,10 +317,10 @@ export default function DashboardPage() {
                                         }`}
                                     >
                                         {pageNumber}
-                                    </Link>
+                                    </button>
                                 ))}
-                                <Link
-                                    href={buildHref(Math.min(bookTotalPages, bookPage + 1), categoryPage)}
+                                <button
+                                    onClick={() => setBookPage((prev) => prev +1)}
                                     className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                         bookPage === bookTotalPages
                                             ? "pointer-events-none border-zinc-200 text-zinc-400"
@@ -341,7 +328,7 @@ export default function DashboardPage() {
                                     }`}
                                 >
                                     Next
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     ) : null}
@@ -380,8 +367,8 @@ export default function DashboardPage() {
                                 Halaman {categoryPage} dari {categoryTotalPages}
                             </span>
                             <div className="flex items-center gap-2">
-                                <Link
-                                    href={buildHref(bookPage, Math.max(1, categoryPage - 1))}
+                                <button
+                                    onClick={() => setCategoryPage((prev) => prev - 1)}
                                     className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                         categoryPage === 1
                                             ? "pointer-events-none border-zinc-200 text-zinc-400"
@@ -389,11 +376,11 @@ export default function DashboardPage() {
                                     }`}
                                 >
                                     Prev
-                                </Link>
+                                </button>
                                 {getPageNumbers(categoryPage, categoryTotalPages).map((pageNumber) => (
-                                    <Link
+                                    <button
                                         key={`category-page-${pageNumber}`}
-                                        href={buildHref(bookPage, pageNumber)}
+                                        onClick={() => setCategoryPage(pageNumber)}
                                         aria-current={pageNumber === categoryPage ? "page" : undefined}
                                         className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                             pageNumber === categoryPage
@@ -402,10 +389,10 @@ export default function DashboardPage() {
                                         }`}
                                     >
                                         {pageNumber}
-                                    </Link>
+                                    </button>
                                 ))}
-                                <Link
-                                    href={buildHref(bookPage, Math.min(categoryTotalPages, categoryPage + 1))}
+                                <button
+                                    onClick={() => setCategoryPage((prev) => prev + 1)}
                                     className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                         categoryPage === categoryTotalPages
                                             ? "pointer-events-none border-zinc-200 text-zinc-400"
@@ -413,7 +400,7 @@ export default function DashboardPage() {
                                     }`}
                                 >
                                     Next
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     ) : null}

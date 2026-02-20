@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
 type Book = {
     id: number;
@@ -24,20 +23,11 @@ type Category = {
 };
 
 export default function PublicBooksPage() {
-    const searchParams = useSearchParams();
     const bookPageSize = 5;
     const categoryPageSize = 5;
-    // const bookPage = useMemo(
-    //     () => Math.max(1, Number(searchParams.get("bookPage") ?? "1") || 1),
-    //     [searchParams]
-    // );
-    // const categoryPage = useMemo(
-    //     () => Math.max(1, Number(searchParams.get("categoryPage") ?? "1") || 1),
-    //     [searchParams]
-    // );
-
     const [bookPage, setBookPage] = useState(1);
     const [categoryPage, setCategoryPage] = useState(1);
+
     const [books, setBooks] = useState<Book[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [totalBookCount, setTotalBookCount] = useState(0);
@@ -48,14 +38,15 @@ export default function PublicBooksPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchCatalogData = async () => {
-        const controller = new AbortController();
+    const fetchCatalogData = async (controller: AbortController) => {
         setIsLoading(true);
         setError(null);
             try {
                 const [booksResponse, categoriesResponse] = await Promise.all([
                     fetch(`/api/books?page=${bookPage}&pageSize=${bookPageSize}`, { signal: controller.signal }),
-                    fetch(`/api/categories?page=${categoryPage}&pageSize=${categoryPageSize}`),
+                    fetch(`/api/categories?page=${categoryPage}&pageSize=${categoryPageSize}`, {
+                        signal: controller.signal,
+                    }),
                 ]);
 
                 if (!booksResponse.ok || !categoriesResponse.ok) {
@@ -84,24 +75,23 @@ export default function PublicBooksPage() {
                 if (!controller.signal.aborted) {
                     setIsLoading(false);
                 }
-                return () => {
-                    controller.abort();
-                };
             }
         };
 
     useEffect(() => {
-        fetchCatalogData();
+        const controller = new AbortController();
+        fetchCatalogData(controller);
+
+        return () => {
+            controller.abort();
+        };
     }, [bookPage, categoryPage]);
-
-    const buildHref = (nextBookPage: number, nextCategoryPage: number) =>
-        `?bookPage=${nextBookPage}&categoryPage=${nextCategoryPage}`;
     const getPageNumbers = (current: number, total: number) => {
-        const maxButtons = 5;
-        const start = Math.max(1, Math.min(current - 2, total - maxButtons + 1));
-        const end = Math.min(total, start + maxButtons - 1);
+            const maxButtons = 5;
+            const start = Math.max(1, Math.min(current - 2, total - maxButtons + 1));
+            const end = Math.min(total, start + maxButtons - 1);
 
-        return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+            return Array.from({ length: end - start + 1 }, (_, index) => start + index);
     };
     const dateFormatter = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" });
 
@@ -183,43 +173,50 @@ export default function PublicBooksPage() {
                                     Halaman {bookPage} dari {bookTotalPages}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    <Link
-                                        href={buildHref(Math.max(1, bookPage - 1), categoryPage)}
+                                    <button
+                                        type="button"
+                                        onClick={() => setBookPage((prev) => prev - 1)
+                                            
+                                        }
                                         className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                             bookPage === 1
                                                 ? "pointer-events-none border-zinc-200 text-zinc-400"
                                                 : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
                                         }`}
+                                        disabled={bookPage === 1}
                                     >
                                         Prev
-                                    </Link>
+                                    </button>
                                     {getPageNumbers(bookPage, bookTotalPages).map((pageNumber) => (
-                                        <Link
+                                        <button
+                                            type="button"
                                             key={`book-page-${pageNumber}`}
-                                            href={buildHref(pageNumber, categoryPage)}
+                                            onClick={() => setBookPage(pageNumber)}
                                             aria-current={pageNumber === bookPage ? "page" : undefined}
                                             className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                                 pageNumber === bookPage
                                                     ? "border-zinc-900 bg-zinc-900 text-white"
                                                     : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
                                             }`}
+                                            disabled={pageNumber === bookPage}
                                         >
                                             {pageNumber}
-                                        </Link>
+                                        </button>
                                     ))}
-                                    <Link
-                                        href={buildHref(
-                                            Math.min(bookTotalPages, bookPage + 1),
-                                            categoryPage
-                                        )}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setBookPage((prev) => prev + 1)
+                                        }
                                         className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                             bookPage === bookTotalPages
                                                 ? "pointer-events-none border-zinc-200 text-zinc-400"
                                                 : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
                                         }`}
+                                        disabled={bookPage === bookTotalPages}
                                     >
                                         Next
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         ) : null}
@@ -259,43 +256,50 @@ export default function PublicBooksPage() {
                                     Halaman {categoryPage} dari {categoryTotalPages}
                                 </span>
                                 <div className="flex items-center gap-2">
-                                    <Link
-                                        href={buildHref(bookPage, Math.max(1, categoryPage - 1))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setCategoryPage((prev) => prev - 1)
+
+                                        }
                                         className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                             categoryPage === 1
                                                 ? "pointer-events-none border-zinc-200 text-zinc-400"
                                                 : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
                                         }`}
+                                        disabled={categoryPage === 1}
                                     >
                                         Prev
-                                    </Link>
+                                    </button>
                                     {getPageNumbers(categoryPage, categoryTotalPages).map((pageNumber) => (
-                                        <Link
+                                        <button
+                                            type="button"
                                             key={`category-page-${pageNumber}`}
-                                            href={buildHref(bookPage, pageNumber)}
+                                            onClick={() => setCategoryPage(pageNumber)}
                                             aria-current={pageNumber === categoryPage ? "page" : undefined}
                                             className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                                 pageNumber === categoryPage
                                                     ? "border-zinc-900 bg-zinc-900 text-white"
                                                     : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
                                             }`}
+                                            disabled={pageNumber === categoryPage}
                                         >
                                             {pageNumber}
-                                        </Link>
+                                        </button>
                                     ))}
-                                    <Link
-                                        href={buildHref(
-                                            bookPage,
-                                            Math.min(categoryTotalPages, categoryPage + 1)
-                                        )}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setCategoryPage((prev) => prev + 1)
+                                        }
                                         className={`rounded-full border px-3 py-1 text-sm font-semibold ${
                                             categoryPage === categoryTotalPages
                                                 ? "pointer-events-none border-zinc-200 text-zinc-400"
                                                 : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
                                         }`}
+                                        disabled={categoryPage === categoryTotalPages}
                                     >
                                         Next
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         ) : null}
