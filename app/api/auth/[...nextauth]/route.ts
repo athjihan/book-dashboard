@@ -5,21 +5,21 @@ import jwt from "jsonwebtoken";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
-    session: {
-        strategy: "jwt",
-    },
-    secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/auth/signin",
   },
-    providers: [
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" },
-            },
-            async authorize(credentials) {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
           throw new Error("Missing required fields");
         }
@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          admin.password || ""
+          admin.password || "",
         );
 
         if (!isPasswordValid) {
@@ -45,28 +45,36 @@ export const authOptions: NextAuthOptions = {
 
         return { id: admin.id, email: admin.email };
       },
-        }),
-    ],
-    callbacks: {
-        async signIn({ account, user }: any) {
-          if (account?.provider === "credentials") {
-            return !!user;
-          }
-          return false;
-        },
-        async jwt({ token, user }: any) {
-          if (user) {
-            token.id = user.id;
-            token.email = user.email;
-          }
-          return token;
-        },
-        async session({ session, token }: any) {
-         session.user.id = token.id;
-         session.user.email = token.email;
-          return session;
-        },
-      },
+    }),
+  ],
+  callbacks: {
+    async signIn({ account, user }: any) {
+      if (account?.provider === "credentials") {
+        return !!user;
+      }
+      return false;
+    },
+    async jwt({ token, user }: any) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+      }
+      return token;
+    },
+    async session({ session, token }: any) {
+      if (token) {
+        const jwtToken = jwt.sign(
+          { id: token.id },
+          process.env.JWT_SECRET || "admin123",
+          { expiresIn: "30d" },
+        );
+        session.data = {
+          token: jwtToken,
+        };
+      }
+      return session;
+    },
+  },
 };
 export const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
