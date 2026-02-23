@@ -25,7 +25,7 @@ function unauthorizedResponse() {
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
@@ -198,7 +198,7 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 

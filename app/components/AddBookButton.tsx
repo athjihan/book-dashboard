@@ -80,7 +80,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-subtitle-responsive font-semibold text-zinc-900">
+                <h2 className="md:text-sm font-semibold text-zinc-900">
                   Tambah Buku
                 </h2>
                 <p className="mt-1 text-small-responsive text-zinc-500">

@@ -7,7 +7,7 @@ export async function validateBasicAuth(req: NextRequest): Promise<boolean> {
 
   // check header auth
   if (!authHeader || !authHeader.startsWith("Basic ")) {
-    throw new Error("Missing or invalid Authorization header");
+    return false;
   }
 
   // split header and credentials
@@ -16,46 +16,36 @@ export async function validateBasicAuth(req: NextRequest): Promise<boolean> {
 
   try {
     credentials = Buffer.from(base64Credentials, "base64").toString("ascii");
+
+    if (!credentials.includes(":")) {
+      return false;
+    }
+
+    const separatorIndex = credentials.indexOf(":");
+    const username = credentials.slice(0, separatorIndex).trim();
+    const password = credentials.slice(separatorIndex + 1);
+
+    if (!username || !password) {
+      return false;
+    }
+
+    const validUsername = process.env.NEXT_PUBLIC_BASIC_AUTH_USERNAME;
+    const validPassword = process.env.NEXT_PUBLIC_BASIC_AUTH_PASSWORD;
+
+    if (username !== validUsername) {
+      return false;
+    }
+
+    if (password !== validPassword) {
+      return false;
+    }
+
+    return true;
   } catch {
     throw new Error("Failed to decode base64 credentials");
   }
-
-  if (!credentials.includes(":")) {
-    throw new Error("Invalid credentials format");
-  }
-
-  const separatorIndex = credentials.indexOf(":");
-  const username = credentials.slice(0, separatorIndex).trim();
-  const password = credentials.slice(separatorIndex + 1);
-
-  if (!username || !password) {
-    throw new Error("Missing username or password");
-  }
-
-  const user = await prisma.user.findFirst({
-    where: {
-      email: username,
-      deletedAt: null,
-    },
-    select: {
-      password: true,
-    },
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return bcrypt.compare(password, user.password);
 }
 
-export async function isAuthorizedRequest(
-  req: NextRequest,
-  session: unknown,
-): Promise<boolean> {
-  if (Boolean(session)) {
-    return true;
-  }
-
+export async function isAuthorizedRequest(req: NextRequest): Promise<boolean> {
   return validateBasicAuth(req);
 }

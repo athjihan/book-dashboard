@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
+import { isAuthorizedRequest } from "@/utils/auth";
 
 function getPaginationParams(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,7 +10,22 @@ function getPaginationParams(request: NextRequest) {
   return { page, pageSize };
 }
 
+function unauthorizedResponse() {
+  return NextResponse.json(
+    {
+      success: false,
+      status: 401,
+      message: "Unauthorized",
+    },
+    { status: 401 },
+  );
+}
+
 export async function GET(request: NextRequest) {
+  if (!(await isAuthorizedRequest(request))) {
+    return unauthorizedResponse();
+  }
+
   try {
     const { page, pageSize } = getPaginationParams(request);
     const [categories, total] = await Promise.all([

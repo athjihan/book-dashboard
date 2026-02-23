@@ -45,11 +45,21 @@ export default function PublicBooksPage() {
       const [booksResponse, categoriesResponse] = await Promise.all([
         fetch(`/api/books?page=${bookPage}&pageSize=${bookPageSize}`, {
           signal: controller.signal,
+          headers: {
+            Authorization: `Basic ${btoa(
+              `${process.env.NEXT_PUBLIC_BASIC_AUTH_USERNAME}:${process.env.NEXT_PUBLIC_BASIC_AUTH_PASSWORD}`,
+            )}`,
+          },
         }),
         fetch(
           `/api/categories?page=${categoryPage}&pageSize=${categoryPageSize}`,
           {
             signal: controller.signal,
+            headers: {
+              Authorization: `Basic ${btoa(
+                `${process.env.NEXT_PUBLIC_BASIC_AUTH_USERNAME}:${process.env.NEXT_PUBLIC_BASIC_AUTH_PASSWORD}`,
+              )}`,
+            },
           },
         ),
       ]);
