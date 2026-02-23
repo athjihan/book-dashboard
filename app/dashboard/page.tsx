@@ -216,20 +216,18 @@ export default function DashboardPage() {
 
   return (
     <section className="page-responsive relative flex min-h-screen flex-col gap-6 bg-zinc-50 text-zinc-900">
-      <div className="absolute right-6 top-6">
-        <LogoutButton />
-      </div>
       <header className="space-y-2">
-        <p className="text-small-responsive font-semibold uppercase tracking-[0.2em] text-zinc-500">
+        <p className="text-subtitle-responsive font-semibold uppercase tracking-[0.2em] text-zinc-500">
           Dashboard
         </p>
+        <LogoutButton />
         <h1 className="text-title-responsive font-bold text-zinc-900">
           Daftar Buku
         </h1>
       </header>
 
       {error ? (
-        <div className="text-body-responsive font-medium rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+        <div className="text-body-responsive  rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
           {error}
         </div>
       ) : null}
@@ -248,7 +246,7 @@ export default function DashboardPage() {
           <p className="text-small-responsive font-semibold uppercase tracking-wide text-zinc-500">
             Total Kategori
           </p>
-          <p className="text-subtitle-responsive mt-2 font-semibold text-zinc-900">
+          <p className="text-body-responsive mt-2 font-semibold text-zinc-900">
             {totalCategoryCount}
           </p>
         </div>
@@ -257,7 +255,7 @@ export default function DashboardPage() {
             <span className="block sm:inline">Total</span>
             <span className="block sm:ml-1 sm:inline">Stok</span>
           </p>
-          <p className="text-subtitle-responsive mt-2 font-semibold text-zinc-900">
+          <p className="text-body-responsive mt-2 font-semibold text-zinc-900">
             {totalStock}
           </p>
         </div>
@@ -270,13 +268,18 @@ export default function DashboardPage() {
 
       <div className="catalog-content-grid">
         <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
+            <h2 className="text-subtitle-responsive font-semibold">
+              Daftar Buku
+            </h2>
+          </div>
           <div className="catalog-books-scroll">
             {!isLoading && books.length === 0 ? (
-              <div className="text-body-responsive font-medium px-6 py-10 text-zinc-500">
+              <div className="text-body-responsive  px-6 py-10 text-zinc-500">
                 Belum ada data buku.
               </div>
             ) : (
-              <table className="catalog-books-table text-body-responsive font-medium w-full border-collapse text-left">
+              <table className="catalog-books-table text-body-responsive  w-full border-collapse text-left">
                 <thead className="text-small-responsive bg-zinc-100 uppercase tracking-wide text-zinc-600">
                   <tr>
                     <th className="px-6 py-4">Judul</th>
@@ -290,17 +293,19 @@ export default function DashboardPage() {
                 <tbody>
                   {books.map((book) => (
                     <tr key={book.id} className="border-t border-zinc-200">
-                      <td className="px-6 py-4 font-medium text-zinc-900">
+                      <td className="px-6 py-4 text-small-responsive text-zinc-900">
                         {book.title}
                       </td>
-                      <td className="px-6 py-4 text-zinc-600">{book.author}</td>
-                      <td className="px-6 py-4 text-zinc-600">
+                      <td className="px-6 py-4 text-small-responsive text-zinc-600">
+                        {book.author}
+                      </td>
+                      <td className="px-6 py-4 text-small-responsive text-zinc-600">
                         {book.category?.name || "-"}
                       </td>
-                      <td className="px-6 py-4 text-right text-zinc-900">
+                      <td className="px-6 py-4 text-right text-small-responsive text-zinc-900">
                         {book.stock}
                       </td>
-                      <td className="px-6 py-4 text-zinc-600">
+                      <td className="px-6 py-4 text-small-responsive text-zinc-600">
                         {dateFormatter.format(new Date(book.updatedAt))}
                       </td>
                       <td className="px-6 py-4">
@@ -322,7 +327,7 @@ export default function DashboardPage() {
             )}
           </div>
           {books.length > 0 && bookTotalPages > 1 ? (
-            <div className="text-body-responsive font-medium flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
+            <div className="text-small-responsive  flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
               <span>
                 Halaman {bookPage} dari {bookTotalPages}
               </span>
@@ -373,7 +378,7 @@ export default function DashboardPage() {
           </div>
           <div className="px-6 py-4">
             {!isLoading && categories.length === 0 ? (
-              <div className="text-body-responsive font-medium text-zinc-500">
+              <div className="text-small-responsive  text-zinc-500">
                 Belum ada kategori.
               </div>
             ) : (
@@ -381,10 +386,10 @@ export default function DashboardPage() {
                 {categories.map((category) => (
                   <li
                     key={category.id}
-                    className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3"
+                    className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3 gap-2"
                   >
                     <div>
-                      <p className="text-body-responsive font-medium text-zinc-900">
+                      <p className="text-small-responsive  text-zinc-900">
                         {category.name}
                       </p>
                       <p className="text-small-responsive text-zinc-500">
@@ -408,7 +413,7 @@ export default function DashboardPage() {
             )}
           </div>
           {categories.length > 0 && categoryTotalPages > 1 ? (
-            <div className="text-body-responsive font-medium flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
+            <div className="text-small-responsive flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
               <span>
                 Halaman {categoryPage} dari {categoryTotalPages}
               </span>

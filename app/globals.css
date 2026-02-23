@@ -25,7 +25,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Desktop-first base styles */
+/* desktop-first base styles */
 .page-responsive {
   padding: 2.5rem 2rem;
 }
@@ -39,7 +39,7 @@ body {
 .catalog-content-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 340px);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 560px);
 }
 
 /* ensure child elements of the content grid can shrink and don't overflow */
@@ -82,7 +82,7 @@ body {
   line-height: 1.5rem;
 }
 
-/* Tablet styles */
+/* tablet styles */
 @media (max-width: 1023px) {
   .page-responsive {
     padding: 2rem 1.5rem;
@@ -117,7 +117,7 @@ body {
   }
 }
 
-/* Mobile styles */
+/* mobile styles */
 @media (max-width: 767px) {
   .page-responsive {
     padding: 1.5rem 1rem;

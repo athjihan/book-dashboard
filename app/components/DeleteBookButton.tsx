@@ -41,15 +41,17 @@ export default function DeleteBookButton({
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-zinc-900">Hapus</h2>
-                <p className="mt-1 text-sm text-zinc-500">
+                <h2 className="text-subtitle-responsive font-semibold text-zinc-900">
+                  Hapus
+                </h2>
+                <p className="mt-1 text-small-responsive text-zinc-500">
                   Hapus buku dari database. Tindakan ini tidak dapat dibatalkan.
                 </p>
               </div>
             </div>
 
             <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
-              <label className="grid gap-2 text-sm font-medium text-zinc-700">
+              <label className="grid gap-2 text-small-responsive  text-zinc-700">
                 Apakah Anda yakin ingin menghapus buku{" "}
                 <span className="font-semibold">{book.title}?</span>
               </label>
@@ -57,14 +59,14 @@ export default function DeleteBookButton({
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="rounded-xl bg-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-400"
+                  className="rounded-xl bg-zinc-300 px-4 py-2 text-small-responsive font-semibold text-zinc-700 hover:bg-zinc-400"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                  className="rounded-xl bg-red-600 px-4 py-2 text-small-responsive font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                 >
                   Hapus
                 </button>
