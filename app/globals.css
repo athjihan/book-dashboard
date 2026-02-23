@@ -24,3 +24,122 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Desktop-first base styles */
+.page-responsive {
+  padding: 2.5rem 2rem;
+}
+
+.catalog-stats-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.catalog-content-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 340px);
+}
+
+/* ensure child elements of the content grid can shrink and don't overflow */
+.catalog-content-grid > * {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.catalog-books-scroll {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.catalog-books-table {
+  min-width: 720px;
+}
+
+.catalog-category-panel {
+  width: 100%;
+  justify-self: end;
+}
+
+.text-title-responsive {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.text-subtitle-responsive {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.text-body-responsive {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-small-responsive {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+/* Tablet styles */
+@media (max-width: 1023px) {
+  .page-responsive {
+    padding: 2rem 1.5rem;
+  }
+
+  .catalog-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-category-panel {
+    justify-self: stretch;
+  }
+
+  .text-title-responsive {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .text-subtitle-responsive {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .text-body-responsive {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .text-small-responsive {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .page-responsive {
+    padding: 1.5rem 1rem;
+  }
+
+  .text-title-responsive {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .text-subtitle-responsive {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .text-body-responsive {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .text-small-responsive {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
