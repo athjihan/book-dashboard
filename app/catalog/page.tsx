@@ -111,7 +111,7 @@ export default function PublicBooksPage() {
             <h1 className="text-title-responsive font-bold">
               Daftar Buku & Kategori
             </h1>
-            <p className="text-body-responsive max-w-2xl text-zinc-600">
+            <p className="text-body-responsive font-medium max-w-2xl text-zinc-600">
               Jelajahi koleksi buku dan kategori yang tersedia. Login untuk
               mengelola data.
             </p>
@@ -125,7 +125,7 @@ export default function PublicBooksPage() {
         </header>
 
         {error ? (
-          <div className="text-body-responsive rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+          <div className="text-body-responsive font-medium rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
             {error}
           </div>
         ) : null}
@@ -167,11 +167,11 @@ export default function PublicBooksPage() {
             </div>
             <div className="catalog-books-scroll">
               {!isLoading && books.length === 0 ? (
-                <div className="text-body-responsive px-6 py-10 text-zinc-500">
+                <div className="text-body-responsive font-medium px-6 py-10 text-zinc-500">
                   Belum ada data buku.
                 </div>
               ) : (
-                <table className="catalog-books-table text-body-responsive w-full border-collapse text-left">
+                <table className="catalog-books-table text-body-responsive font-medium w-full border-collapse text-left">
                   <thead className="text-small-responsive bg-zinc-100 uppercase tracking-wide text-zinc-600">
                     <tr>
                       <th className="px-6 py-4">Judul</th>
@@ -193,7 +193,7 @@ export default function PublicBooksPage() {
                         <td className="px-6 py-4 text-zinc-600">
                           {book.category?.name}
                         </td>
-                        <td className="px-6 py-4 text-right font-semibold text-zinc-900">
+                        <td className="px-6 py-4 text-right text-zinc-900">
                           {book.stock}
                         </td>
                         <td className="px-6 py-4 text-zinc-600">
@@ -206,7 +206,7 @@ export default function PublicBooksPage() {
               )}
             </div>
             {books.length > 0 && bookTotalPages > 1 ? (
-              <div className="text-body-responsive flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 gap-2">
+              <div className="text-body-responsive font-medium flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 gap-2">
                 <span>
                   Halaman {bookPage} dari {bookTotalPages}
                 </span>
@@ -268,7 +268,7 @@ export default function PublicBooksPage() {
             </div>
             <div className="px-6 py-4">
               {!isLoading && categories.length === 0 ? (
-                <div className="text-body-responsive text-zinc-500">
+                <div className="text-body-responsive font-medium text-zinc-500">
                   Belum ada kategori.
                 </div>
               ) : (
@@ -279,7 +279,7 @@ export default function PublicBooksPage() {
                       className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3"
                     >
                       <div>
-                        <p className="text-body-responsive font-semibold text-zinc-900">
+                        <p className="text-body-responsive font-medium text-zinc-900">
                           {category.name}
                         </p>
                         <p className="text-small-responsive text-zinc-500">
@@ -295,7 +295,7 @@ export default function PublicBooksPage() {
               )}
             </div>
             {categories.length > 0 && categoryTotalPages > 1 ? (
-              <div className="text-body-responsive flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
+              <div className="text-body-responsive font-medium flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
                 <span>
                   Halaman {categoryPage} dari {categoryTotalPages}
                 </span>

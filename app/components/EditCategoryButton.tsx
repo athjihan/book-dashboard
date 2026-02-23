@@ -39,7 +39,6 @@ export default function EditCategoryButton({
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
           <Edit className="h-4 w-4" aria-hidden="true" />
         </span>
-        <span className="font-medium">Edit</span>
       </button>
 
       {isOpen ? (

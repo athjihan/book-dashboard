@@ -72,7 +72,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
           <Plus className="h-4 w-4" aria-hidden="true" />
         </span>
-        <span className="font-medium">Tambah Buku</span>
+        <span className="font-medium">Buku</span>
       </button>
 
       {isOpen ? (

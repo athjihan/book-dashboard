@@ -37,7 +37,7 @@ export default function AddCategoryButton({
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
           <Plus className="h-4 w-4" aria-hidden="true" />
         </span>
-        <span className="font-medium">Tambah Kategori</span>
+        <span className="font-medium">Kategori</span>
       </button>
 
       {isOpen ? (
