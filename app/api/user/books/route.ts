@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { unlink } from "fs/promises";
+import path from "path";
 
 function getPaginationParams(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -33,7 +35,10 @@ export async function GET(request: NextRequest) {
     const [books, total, stockAggregate] = await Promise.all([
       prisma.book.findMany({
         where: { deletedAt: null },
-        include: { category: true, image: true },
+        include: {
+          category: true,
+          image: true,
+        },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -87,14 +92,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, author, categoryId, imageId, stock } = body;
+    const { title, author, categoryId, imagePath, imageName, stock } = body;
 
-    if (!title || !author || !categoryId || !imageId || stock == null) {
+    if (!title || !author || !categoryId || stock == null) {
       return NextResponse.json(
         {
           success: false,
           status: 400,
-          message: "Missing required fields",
+          message: "Missing required fields: title, author, categoryId, stock",
         },
         { status: 400 },
       );
@@ -115,13 +120,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If imagePath provided, create Image record first
+    let imageId: string | null = null;
+    if (imagePath) {
+      const image = await prisma.image.create({
+        data: { path: imagePath, name: imageName },
+      });
+      imageId = image.id;
+    }
+
     const book = await prisma.book.create({
       data: {
         title,
         author,
         stock: parseInt(stock),
         categoryId: category.id,
-        imageId: imageId.id,
+        imageId: imageId,
       },
       include: { category: true, image: true },
     });
@@ -169,10 +183,46 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    const existingBook = await prisma.book.findFirst({
+      where: { id, deletedAt: null },
+      include: { image: true },
+    });
+
+    if (!existingBook) {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 404,
+          message: "Book not found",
+        },
+        { status: 404 },
+      );
+    }
+
     await prisma.book.update({
       where: { id },
       data: { deletedAt: new Date() },
     });
+
+    if (existingBook.imageId) {
+      await prisma.image.update({
+        where: { id: existingBook.imageId },
+        data: { deletedAt: new Date() },
+      });
+
+      if (existingBook.image?.path) {
+        const publicFilePath = path.join(
+          process.cwd(),
+          "public",
+          existingBook.image.path.replace(/^\//, ""),
+        );
+        try {
+          await unlink(publicFilePath);
+        } catch {
+          // ignore file delete errors (file may not exist)
+        }
+      }
+    }
 
     return NextResponse.json(
       {
@@ -203,7 +253,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, title, author, categoryId, stock } = body;
+    const { id, title, author, categoryId, stock, imagePath, imageName } = body;
 
     if (!id || !title || !author || !categoryId || stock == null) {
       return NextResponse.json(
@@ -231,6 +281,51 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const existingBook = await prisma.book.findFirst({
+      where: { id, deletedAt: null },
+      include: { image: true },
+    });
+
+    if (!existingBook) {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 404,
+          message: "Book not found",
+        },
+        { status: 404 },
+      );
+    }
+
+    let nextImageId: string | null = existingBook.imageId;
+
+    if (imagePath) {
+      const newImage = await prisma.image.create({
+        data: { path: imagePath, name: imageName || null },
+      });
+      nextImageId = newImage.id;
+
+      if (existingBook.image?.id) {
+        await prisma.image.update({
+          where: { id: existingBook.image.id },
+          data: { deletedAt: new Date() },
+        });
+
+        if (existingBook.image.path) {
+          const publicFilePath = path.join(
+            process.cwd(),
+            "public",
+            existingBook.image.path.replace(/^\//, ""),
+          );
+          try {
+            await unlink(publicFilePath);
+          } catch {
+            // ignore file delete errors (file may not exist)
+          }
+        }
+      }
+    }
+
     const book = await prisma.book.update({
       where: { id },
       data: {
@@ -238,8 +333,12 @@ export async function PUT(request: NextRequest) {
         author,
         stock: parseInt(stock),
         categoryId: category.id,
+        imageId: nextImageId,
       },
-      include: { category: true },
+      include: {
+        category: true,
+        image: true,
+      },
     });
 
     return NextResponse.json(

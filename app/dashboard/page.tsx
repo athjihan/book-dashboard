@@ -49,7 +49,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleEditBook = async (bookId: number, data: BookFormPayload) => {
+  const handleEditBook = async (bookId: string, data: BookFormPayload) => {
     try {
       const response = await fetch(`/api/user/books`, {
         method: "PUT",
@@ -67,7 +67,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDeleteBook = async (bookId: number) => {
+  const handleDeleteBook = async (bookId: string) => {
     try {
       const response = await fetch("/api/user/books", {
         method: "DELETE",
@@ -105,7 +105,7 @@ export default function DashboardPage() {
   };
 
   const handleEditCategory = async (
-    categoryId: number,
+    categoryId: string,
     data: CategoryFormPayload,
   ) => {
     try {
@@ -125,7 +125,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDeleteCategory = async (categoryId: number) => {
+  const handleDeleteCategory = async (categoryId: string) => {
     try {
       const response = await fetch("/api/user/categories", {
         method: "DELETE",

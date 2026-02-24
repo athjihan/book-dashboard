@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { FileImage, Plus } from "lucide-react";
 import type { BookCategory, BookFormPayload } from "../types/dashboard";
 
 type AddBookButtonProps = {
@@ -14,6 +14,15 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
   const [categories, setCategories] = useState<BookCategory[]>([]);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [categoryError, setCategoryError] = useState("");
+  const [fileName, setFileName] = useState("Belum ada file dipilih");
+  const [fileImage, setFileImage] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState("");
+
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [stock, setStock] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -46,20 +55,92 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     fetchCategories();
   }, [isOpen]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setFileImage(file);
+      setFileName(file.name);
+      setUploadError("");
+      return;
+    }
+
+    setSelectedFile(null);
+    setFileImage(null);
+    setFileName("Belum ada file dipilih");
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setUploadError("");
+
+    if (!selectedFile) {
+      setUploadError("Gambar wajib diunggah");
+      return;
+    }
+
     setIsLoading(true);
 
-    const formData = new FormData(event.currentTarget);
-    const data = {
-      title: formData.get("title") as string,
-      author: formData.get("author") as string,
-      categoryId: Number(formData.get("categoryId")),
-      stock: Number(formData.get("stock")),
-    };
+    try {
+      let uploadedPath: string | undefined;
+      let uploadedName: string | undefined;
 
-    await onSubmit(data).finally(() => setIsLoading(false));
+      // upload file jika ada -> biar dpt path
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const uploadRes = await fetch("/api/user/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json();
+        throw new Error(errorData.message || "Gagal upload gambar");
+      }
+
+      const uploadData = await uploadRes.json();
+      uploadedPath = uploadData.data.path;
+      uploadedName = uploadData?.data?.name;
+
+      const data: BookFormPayload = {
+        title: title,
+        author: author,
+        categoryId: categoryId,
+        stock: Number(stock),
+        imagePath: uploadedPath,
+        ...(uploadedName ? { imageName: uploadedName } : {}),
+      };
+
+      await onSubmit(data);
+      setIsOpen(false);
+      setSelectedFile(null);
+      setFileImage(null);
+      setFileName("Belum ada file dipilih");
+      setTitle("");
+      setAuthor("");
+      setCategoryId("");
+      setStock("");
+    } catch (error) {
+      setUploadError(
+        error instanceof Error ? error.message : "Terjadi kesalahan",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
     setIsOpen(false);
+    setSelectedFile(null);
+    setFileImage(null);
+    setFileName("Belum ada file dipilih");
+    setUploadError("");
+    setTitle("");
+    setAuthor("");
+    setCategoryId("");
+    setStock("");
   };
 
   return (
@@ -94,34 +175,70 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
               onSubmit={handleSubmit}
               autoComplete="off"
             >
-              <label className="grid gap-2 text-small-responsive  text-zinc-700">
+              <label className="grid gap-2 text-small-responsive text-zinc-700">
+                Gambar
+                <input
+                  id="book-image"
+                  name="image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <label
+                  htmlFor="book-image"
+                  className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-700 hover:bg-zinc-100"
+                >
+                  <div className="h-4 w-4" aria-hidden="true">
+                    {fileImage ? (
+                      <img
+                        src={URL.createObjectURL(fileImage)}
+                        alt="Preview"
+                        className="h-4 w-4"
+                      />
+                    ) : (
+                      <FileImage className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-500">{fileName}</div>
+                </label>
+                {uploadError && (
+                  <span className="text-xs font-normal text-red-600">
+                    {uploadError}
+                  </span>
+                )}
+              </label>
+
+              <label className="grid gap-2 text-small-responsive text-zinc-700">
                 Judul Buku
                 <input
-                  name="title"
                   type="text"
                   required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
                   placeholder="Contoh: Clean Code"
                 />
               </label>
-              <label className="grid gap-2 text-small-responsive  text-zinc-700">
+              <label className="grid gap-2 text-small-responsive text-zinc-700">
                 Penulis
                 <input
-                  name="author"
                   type="text"
                   required
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
                   placeholder="Contoh: Robert C. Martin"
                 />
               </label>
-              <label className="grid gap-2 text-small-responsive  text-zinc-700">
+              <label className="grid gap-2 text-small-responsive text-zinc-700">
                 Kategori
                 <select
-                  name="categoryId"
                   required
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
                   disabled={isCategoryLoading || categories.length === 0}
-                  defaultValue=""
                 >
                   <option value="" disabled>
                     {isCategoryLoading
@@ -140,13 +257,14 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                   </span>
                 )}
               </label>
-              <label className="grid gap-2 text-small-responsive  text-zinc-700">
+              <label className="grid gap-2 text-small-responsive text-zinc-700">
                 Stok
                 <input
-                  name="stock"
                   type="number"
                   min={0}
                   required
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
                   placeholder="0"
                 />
@@ -155,9 +273,9 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
               <div className="mt-2 flex items-center justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setIsOpen(false)}
+                  onClick={handleCloseModal}
                   disabled={isLoading}
-                  className="rounded-xl border border-zinc-200 px-4 py-2 text-small-responsive  text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
+                  className="rounded-xl border border-zinc-200 px-4 py-2 text-small-responsive text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
                 >
                   Cancel
                 </button>

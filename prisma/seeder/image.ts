@@ -6,30 +6,37 @@ export async function imageSeeder(prisma: PrismaClient) {
     {
       id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
       path: "/laskar-pelangi.jpg",
+      name: "laskar-pelangi.jpg",
     },
     {
       id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2",
       path: "/bumi-manusia.jpg",
+      name: "bumi-manusia.jpg",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc3",
       path: "/clean-code.jpg",
+      name: "clean-code.jpg",
     },
     {
       id: "dddddddd-dddd-dddd-dddd-dddddddddddd4",
       path: "/pragmatic-programmer.jpg",
+      name: "pragmatic-programmer.jpg",
     },
     {
       id: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee5",
       path: "/refactoring-ui.jpg",
+      name: "refactoring-ui.jpg",
     },
     {
       id: "ffffffff-ffff-ffff-ffff-fffffffffff6",
       path: "/atomic-habits.jpg",
+      name: "atomic-habits.jpg",
     },
     {
       id: "gggggggg-gggg-gggg-gggg-ggggggggggg7",
       path: "/filosofi-teras.jpg",
+      name: "filosofi-teras.jpg",
     },
   ];
   console.log("Seeding images...");

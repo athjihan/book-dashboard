@@ -9,6 +9,7 @@ export type Book = {
   } | null;
   image: {
     path: string;
+    name: string;
   } | null;
 };
 

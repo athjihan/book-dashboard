@@ -6,7 +6,7 @@ import type { CategoryFormPayload, CategoryItem } from "../types/dashboard";
 
 type EditCategoryButtonProps = {
   category: Pick<CategoryItem, "id" | "name">;
-  onSubmit: (categoryId: number, data: CategoryFormPayload) => Promise<void>;
+  onSubmit: (categoryId: string, data: CategoryFormPayload) => Promise<void>;
 };
 
 export default function EditCategoryButton({

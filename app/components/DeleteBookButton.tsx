@@ -6,7 +6,7 @@ import type { BookItem } from "../types/dashboard";
 
 type DeleteBookButtonProps = {
   book: Pick<BookItem, "id" | "title">;
-  onSubmit: (bookId: number) => Promise<void>;
+  onSubmit: (bookId: string) => Promise<void>;
 };
 
 export default function DeleteBookButton({

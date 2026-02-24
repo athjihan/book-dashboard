@@ -6,7 +6,7 @@ import type { CategoryItem } from "../types/dashboard";
 
 type DeleteCategoryButtonProps = {
   category: Pick<CategoryItem, "id" | "name">;
-  onSubmit: (categoryId: number) => Promise<void>;
+  onSubmit: (categoryId: string) => Promise<void>;
 };
 
 export default function DeleteCategoryButton({

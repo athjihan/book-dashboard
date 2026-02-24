@@ -1,15 +1,16 @@
 export type BookCategory = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export type BookImage = {
-  id: number;
+  id: string;
   path: string;
+  name: string;
 };
 
 export type BookItem = {
-  id: number;
+  id: string;
   title: string;
   author: string;
   stock: number;
@@ -19,7 +20,7 @@ export type BookItem = {
 };
 
 export type CategoryItem = {
-  id: number;
+  id: string;
   name: string;
   _count: {
     books: number;
@@ -43,8 +44,10 @@ export type PaginatedResponse<T> = {
 export type BookFormPayload = {
   title: string;
   author: string;
-  categoryId: number;
+  categoryId: string;
   stock: number;
+  imagePath?: string;
+  imageName?: string;
 };
 
 export type CategoryFormPayload = {
