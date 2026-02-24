@@ -96,51 +96,51 @@ export default function PublicBooksPage() {
     <section className="page-responsive relative flex min-h-screen flex-col gap-6 bg-zinc-50 text-zinc-900">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
-          <p className="text-subtitle-responsive font-semibold uppercase tracking-[0.2em] text-zinc-500">
+          <p className="text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Katalog Publik
           </p>
-          <h1 className="text-title-responsive font-bold">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
             Daftar Buku & Kategori
           </h1>
         </div>
         <Link
           href="/auth/signin?callbackUrl=/dashboard"
-          className="text-body-responsive inline-flex items-center justify-center rounded-3xl bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 absolute right-6 top-6"
+          className="text-sm md:text-base lg:text-lg inline-flex items-center justify-center rounded-3xl bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 absolute right-6 top-6"
         >
           Login
         </Link>
       </header>
 
       {error ? (
-        <div className="text-body-responsive  rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+        <div className="text-sm md:text-base lg:text-lg  rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
           {error}
         </div>
       ) : null}
 
       <div className="catalog-stats-grid">
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-small-responsive font-semibold uppercase tracking-wide text-zinc-500">
+          <p className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-zinc-500">
             <span className="block sm:inline">Total</span>
             <span className="block sm:ml-1 sm:inline">Buku</span>
           </p>
-          <p className="text-subtitle-responsive mt-2 font-semibold text-zinc-900">
+          <p className="text-base md:text-lg lg:text-xl mt-2 font-semibold text-zinc-900">
             {totalBookCount}
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-small-responsive font-semibold uppercase tracking-wide text-zinc-500">
+          <p className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-zinc-500">
             Total Kategori
           </p>
-          <p className="text-body-responsive mt-2 font-semibold text-zinc-900">
+          <p className="text-sm md:text-base lg:text-lg mt-2 font-semibold text-zinc-900">
             {totalCategoryCount}
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-small-responsive font-semibold uppercase tracking-wide text-zinc-500">
+          <p className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-zinc-500">
             <span className="block sm:inline">Total</span>
             <span className="block sm:ml-1 sm:inline">Stok</span>
           </p>
-          <p className="text-body-responsive mt-2 font-semibold text-zinc-900">
+          <p className="text-sm md:text-base lg:text-lg mt-2 font-semibold text-zinc-900">
             {totalStock}
           </p>
         </div>
@@ -148,18 +148,18 @@ export default function PublicBooksPage() {
       <div className="catalog-content-grid">
         <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
-            <h2 className="text-subtitle-responsive font-semibold">
+            <h2 className="text-base md:text-lg lg:text-xl font-semibold">
               Daftar Buku
             </h2>
           </div>
           <div className="catalog-books-scroll">
             {!isLoading && books.length === 0 ? (
-              <div className="text-body-responsive  px-6 py-10 text-zinc-500">
+              <div className="text-sm md:text-base lg:text-lg  px-6 py-10 text-zinc-500">
                 Belum ada data buku.
               </div>
             ) : (
-              <table className="catalog-books-table text-body-responsive  w-full border-collapse text-left">
-                <thead className="text-small-responsive bg-zinc-100 uppercase tracking-wide text-zinc-600">
+              <table className="catalog-books-table text-sm md:text-base lg:text-lg  w-full border-collapse text-left">
+                <thead className="text-xs md:text-sm lg:text-base bg-zinc-100 uppercase tracking-wide text-zinc-600">
                   <tr>
                     <th className="px-6 py-4">Gambar</th>
                     <th className="px-6 py-4">Judul</th>
@@ -172,7 +172,7 @@ export default function PublicBooksPage() {
                 <tbody>
                   {books.map((book) => (
                     <tr key={book.id} className="border-t border-zinc-200">
-                      <td className="px-6 py-4 text-small-responsive text-zinc-900">
+                      <td className="px-6 py-4 text-xs md:text-sm lg:text-base text-zinc-900">
                         {book.image?.path ? (
                           <img
                             src={book.image.path}
@@ -183,19 +183,19 @@ export default function PublicBooksPage() {
                           <div className="h-12 w-12 rounded-md bg-zinc-200"></div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-small-responsive text-zinc-900">
+                      <td className="px-6 py-4 text-xs md:text-sm lg:text-base text-zinc-900">
                         {book.title}
                       </td>
-                      <td className="px-6 py-4 text-small-responsive text-zinc-600">
+                      <td className="px-6 py-4 text-xs md:text-sm lg:text-base text-zinc-600">
                         {book.author}
                       </td>
-                      <td className="px-6 py-4 text-small-responsive text-zinc-600">
+                      <td className="px-6 py-4 text-xs md:text-sm lg:text-base text-zinc-600">
                         {book.category?.name}
                       </td>
-                      <td className="px-6 py-4 text-right text-small-responsive text-zinc-900">
+                      <td className="px-6 py-4 text-right text-xs md:text-sm lg:text-base text-zinc-900">
                         {book.stock}
                       </td>
-                      <td className="px-6 py-4 text-small-responsive text-zinc-600">
+                      <td className="px-6 py-4 text-xs md:text-sm lg:text-base text-zinc-600">
                         {dateFormatter.format(new Date(book.updatedAt))}
                       </td>
                     </tr>
@@ -205,7 +205,7 @@ export default function PublicBooksPage() {
             )}
           </div>
           {books.length > 0 && bookTotalPages > 1 ? (
-            <div className="text-small-responsive  flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 gap-2">
+            <div className="text-xs md:text-sm lg:text-base  flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 gap-2">
               <span>
                 Halaman {bookPage} dari {bookTotalPages}
               </span>
@@ -213,7 +213,7 @@ export default function PublicBooksPage() {
                 <button
                   type="button"
                   onClick={() => setBookPage((prev) => prev - 1)}
-                  className={`text-small-responsive rounded-full border px-3 py-1 font-semibold ${
+                  className={`text-xs md:text-sm lg:text-base rounded-full border px-3 py-1 font-semibold ${
                     bookPage === 1
                       ? "pointer-events-none border-zinc-200 text-zinc-400"
                       : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
@@ -228,7 +228,7 @@ export default function PublicBooksPage() {
                     key={`book-page-${pageNumber}`}
                     onClick={() => setBookPage(pageNumber)}
                     aria-current={pageNumber === bookPage ? "page" : undefined}
-                    className={`text-small-responsive rounded-full border px-3 py-1 font-semibold ${
+                    className={`text-xs md:text-sm lg:text-base rounded-full border px-3 py-1 font-semibold ${
                       pageNumber === bookPage
                         ? "border-zinc-900 bg-zinc-900 text-white"
                         : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
@@ -241,7 +241,7 @@ export default function PublicBooksPage() {
                 <button
                   type="button"
                   onClick={() => setBookPage((prev) => prev + 1)}
-                  className={`text-small-responsive rounded-full border px-3 py-1 font-semibold ${
+                  className={`text-xs md:text-sm lg:text-base rounded-full border px-3 py-1 font-semibold ${
                     bookPage === bookTotalPages
                       ? "pointer-events-none border-zinc-200 text-zinc-400"
                       : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
@@ -257,13 +257,13 @@ export default function PublicBooksPage() {
 
         <aside className="catalog-category-panel rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <div className="border-b border-zinc-200 px-6 py-4">
-            <h2 className="text-subtitle-responsive font-semibold">
+            <h2 className="text-base md:text-lg lg:text-xl font-semibold">
               Kategori Buku
             </h2>
           </div>
           <div className="px-6 py-4">
             {!isLoading && categories.length === 0 ? (
-              <div className="text-body-responsive  text-zinc-500">
+              <div className="text-sm md:text-base lg:text-lg  text-zinc-500">
                 Belum ada kategori.
               </div>
             ) : (
@@ -274,14 +274,14 @@ export default function PublicBooksPage() {
                     className="flex items-center justify-between rounded-xl border border-zinc-200 px-4 py-3"
                   >
                     <div>
-                      <p className="text-small-responsive  text-zinc-900">
+                      <p className="text-xs md:text-sm lg:text-base  text-zinc-900">
                         {category.name}
                       </p>
-                      <p className="text-small-responsive text-zinc-500">
+                      <p className="text-xs md:text-sm lg:text-base text-zinc-500">
                         {category._count.books} buku
                       </p>
                     </div>
-                    <span className="text-small-responsive rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-600">
+                    <span className="text-xs md:text-sm lg:text-base rounded-full bg-zinc-100 px-3 py-1 font-semibold text-zinc-600">
                       {category._count.books}
                     </span>
                   </li>
@@ -290,7 +290,7 @@ export default function PublicBooksPage() {
             )}
           </div>
           {categories.length > 0 && categoryTotalPages > 1 ? (
-            <div className="text-body-responsive  flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
+            <div className="text-sm md:text-base lg:text-lg  flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600">
               <span>
                 Halaman {categoryPage} dari {categoryTotalPages}
               </span>
@@ -298,7 +298,7 @@ export default function PublicBooksPage() {
                 <button
                   type="button"
                   onClick={() => setCategoryPage((prev) => prev - 1)}
-                  className={`text-small-responsive rounded-full border px-3 py-1 font-semibold ${
+                  className={`text-xs md:text-sm lg:text-base rounded-full border px-3 py-1 font-semibold ${
                     categoryPage === 1
                       ? "pointer-events-none border-zinc-200 text-zinc-400"
                       : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
@@ -316,7 +316,7 @@ export default function PublicBooksPage() {
                       aria-current={
                         pageNumber === categoryPage ? "page" : undefined
                       }
-                      className={`text-small-responsive rounded-full border px-3 py-1 font-semibold ${
+                      className={`text-xs md:text-sm lg:text-base rounded-full border px-3 py-1 font-semibold ${
                         pageNumber === categoryPage
                           ? "border-zinc-900 bg-zinc-900 text-white"
                           : "border-zinc-300 text-zinc-700 hover:border-zinc-400"
@@ -330,7 +330,7 @@ export default function PublicBooksPage() {
                 <button
                   type="button"
                   onClick={() => setCategoryPage((prev) => prev + 1)}
-                  className={`text-small-responsive rounded-full border px-3 py-1 font-semibold ${
+                  className={`text-xs md:text-sm lg:text-base rounded-full border px-3 py-1 font-semibold ${
                     categoryPage === categoryTotalPages
                       ? "pointer-events-none border-zinc-200 text-zinc-400"
                       : "border-zinc-300 text-zinc-700 hover:border-zinc-400"

@@ -153,7 +153,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
           <Plus className="h-4 w-4" aria-hidden="true" />
         </span>
-        <span className="text-body-responsive">Buku</span>
+        <span className="text-sm md:text-base lg:text-lg">Buku</span>
       </button>
 
       {isOpen ? (
@@ -164,7 +164,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                 <h2 className="md:text-sm font-semibold text-zinc-900">
                   Tambah Buku
                 </h2>
-                <p className="mt-1 text-small-responsive text-zinc-500">
+                <p className="mt-1 text-xs md:text-sm lg:text-base text-zinc-500">
                   Isi data buku baru sebelum disimpan ke database.
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
               onSubmit={handleSubmit}
               autoComplete="off"
             >
-              <label className="grid gap-2 text-small-responsive text-zinc-700">
+              <label className="grid gap-2 text-xs md:text-sm lg:text-base text-zinc-700">
                 Gambar
                 <input
                   id="book-image"
@@ -187,7 +187,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                 />
                 <label
                   htmlFor="book-image"
-                  className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-700 hover:bg-zinc-100"
+                  className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
                 >
                   <div className="h-4 w-4" aria-hidden="true">
                     {fileImage ? (
@@ -209,35 +209,35 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                 )}
               </label>
 
-              <label className="grid gap-2 text-small-responsive text-zinc-700">
+              <label className="grid gap-2 text-xs md:text-sm lg:text-base text-zinc-700">
                 Judul Buku
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-900 focus:border-green-600 focus:outline-none"
                   placeholder="Contoh: Clean Code"
                 />
               </label>
-              <label className="grid gap-2 text-small-responsive text-zinc-700">
+              <label className="grid gap-2 text-xs md:text-sm lg:text-base text-zinc-700">
                 Penulis
                 <input
                   type="text"
                   required
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-900 focus:border-green-600 focus:outline-none"
                   placeholder="Contoh: Robert C. Martin"
                 />
               </label>
-              <label className="grid gap-2 text-small-responsive text-zinc-700">
+              <label className="grid gap-2 text-xs md:text-sm lg:text-base text-zinc-700">
                 Kategori
                 <select
                   required
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-900 focus:border-green-600 focus:outline-none"
                   disabled={isCategoryLoading || categories.length === 0}
                 >
                   <option value="" disabled>
@@ -257,7 +257,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                   </span>
                 )}
               </label>
-              <label className="grid gap-2 text-small-responsive text-zinc-700">
+              <label className="grid gap-2 text-xs md:text-sm lg:text-base text-zinc-700">
                 Stok
                 <input
                   type="number"
@@ -265,7 +265,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                   required
                   value={stock}
                   onChange={(e) => setStock(e.target.value)}
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-green-600 focus:outline-none"
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-900 focus:border-green-600 focus:outline-none"
                   placeholder="0"
                 />
               </label>
@@ -275,14 +275,14 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                   type="button"
                   onClick={handleCloseModal}
                   disabled={isLoading}
-                  className="rounded-xl border border-zinc-200 px-4 py-2 text-small-responsive text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
+                  className="rounded-xl border border-zinc-200 px-4 py-2 text-xs md:text-sm lg:text-base text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="rounded-xl bg-green-600 px-4 py-2 text-small-responsive font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                  className="rounded-xl bg-green-600 px-4 py-2 text-xs md:text-sm lg:text-base font-semibold text-white hover:bg-green-700 disabled:opacity-50"
                 >
                   {isLoading ? "Menyimpan..." : "Simpan"}
                 </button>

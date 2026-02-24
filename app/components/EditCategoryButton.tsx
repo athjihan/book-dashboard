@@ -46,23 +46,23 @@ export default function EditCategoryButton({
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-subtitle-responsive font-semibold text-zinc-900">
+                <h2 className="text-base md:text-lg lg:text-xl font-semibold text-zinc-900">
                   Edit Kategori
                 </h2>
-                <p className="mt-1 text-small-responsive text-zinc-500">
+                <p className="mt-1 text-xs md:text-sm lg:text-base text-zinc-500">
                   Ubah data kategori sebelum disimpan ke database.
                 </p>
               </div>
             </div>
 
             <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
-              <label className="grid gap-2 text-small-responsive  text-zinc-700">
+              <label className="grid gap-2 text-xs md:text-sm lg:text-base  text-zinc-700">
                 Nama Kategori
                 <input
                   name="categoryName"
                   type="text"
                   required
-                  className="rounded-lg border border-zinc-200 px-3 py-2 text-small-responsive text-zinc-900 focus:border-blue-600 focus:outline-none"
+                  className="rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-900 focus:border-blue-600 focus:outline-none"
                   placeholder="Contoh: Teknologi"
                   defaultValue={category.name}
                 />
@@ -73,14 +73,14 @@ export default function EditCategoryButton({
                   type="button"
                   onClick={() => setIsOpen(false)}
                   disabled={isLoading}
-                  className="rounded-xl border border-zinc-200 px-4 py-2 text-small-responsive text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
+                  className="rounded-xl border border-zinc-200 px-4 py-2 text-xs md:text-sm lg:text-base text-zinc-600 hover:bg-zinc-100 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="rounded-xl bg-blue-600 px-4 py-2 text-small-responsive font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="rounded-xl bg-blue-600 px-4 py-2 text-xs md:text-sm lg:text-base font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                 >
                   {isLoading ? "Menyimpan..." : "Simpan"}
                 </button>
