@@ -94,12 +94,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, author, categoryId, imagePath, imageName, stock } = body;
 
-    if (!title || !author || !categoryId || stock == null) {
+    if (
+      !title ||
+      !author ||
+      !categoryId ||
+      !imagePath ||
+      !imageName ||
+      stock == null
+    ) {
       return NextResponse.json(
         {
           success: false,
           status: 400,
-          message: "Missing required fields: title, author, categoryId, stock",
+          message: "Missing required fields",
         },
         { status: 400 },
       );
@@ -120,7 +127,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If imagePath provided, create Image record first
     let imageId: string | null = null;
     if (imagePath) {
       const image = await prisma.image.create({
@@ -255,7 +261,15 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { id, title, author, categoryId, stock, imagePath, imageName } = body;
 
-    if (!id || !title || !author || !categoryId || stock == null) {
+    if (
+      !id ||
+      !title ||
+      !author ||
+      !categoryId ||
+      !imagePath ||
+      !imageName ||
+      stock == null
+    ) {
       return NextResponse.json(
         {
           success: false,

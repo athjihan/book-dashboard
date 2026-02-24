@@ -82,8 +82,8 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     setIsLoading(true);
 
     try {
-      let uploadedPath: string | undefined;
-      let uploadedName: string | undefined;
+      let uploadedPath: string;
+      let uploadedName: string;
 
       // upload file jika ada -> biar dpt path
 
@@ -109,8 +109,8 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
         author: author,
         categoryId: categoryId,
         stock: Number(stock),
-        imagePath: uploadedPath,
-        ...(uploadedName ? { imageName: uploadedName } : {}),
+        imagePath: uploadedPath || "",
+        imageName: uploadedName || "",
       };
 
       await onSubmit(data);

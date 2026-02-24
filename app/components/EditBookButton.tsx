@@ -27,7 +27,6 @@ export default function EditBookButton({
   const [previewImagePath, setPreviewImagePath] = useState("");
   const [uploadError, setUploadError] = useState("");
 
-  // Form state
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -138,23 +137,21 @@ export default function EditBookButton({
         }
 
         const uploadData = await uploadRes.json();
-        uploadedPath = uploadData?.data?.path ?? undefined;
-        uploadedName = uploadData?.data?.name ?? undefined;
+        uploadedPath = uploadData?.data?.path ?? "";
+        uploadedName = uploadData?.data?.name ?? "";
       }
 
-      // submit dengan state values
       const data: BookFormPayload = {
         title: title,
         author: author,
         categoryId: categoryId,
         stock: Number(stock),
-        ...(uploadedPath ? { imagePath: uploadedPath } : {}),
-        ...(uploadedName ? { imageName: uploadedName } : {}),
+        imagePath: uploadedPath || book.image?.path || "",
+        imageName: uploadedName || book.image?.name || "",
       };
 
       await onSubmit(book.id, data);
 
-      // reset form
       setIsOpen(false);
       setSelectedFile(null);
       setPreviewImagePath("");

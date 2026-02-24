@@ -46,8 +46,8 @@ export type BookFormPayload = {
   author: string;
   categoryId: string;
   stock: number;
-  imagePath?: string;
-  imageName?: string;
+  imagePath: string;
+  imageName: string;
 };
 
 export type CategoryFormPayload = {
