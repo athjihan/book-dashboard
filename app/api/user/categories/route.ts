@@ -24,7 +24,7 @@ function unauthorizedResponse() {
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
@@ -147,7 +147,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const category = await prisma.category.update({
-      where: { id: Number(id) },
+      where: { id },
       data: { name: categoryName },
     });
 
@@ -175,15 +175,15 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions);
-  if (!(await isAuthorizedRequest(request, session))) {
+  if (!session) {
     return unauthorizedResponse();
   }
 
   try {
     const body = await request.json();
-    const id = Number(body?.id);
+    const id = body?.id;
 
-    if (!id || Number.isNaN(id)) {
+    if (!id) {
       return NextResponse.json(
         {
           success: false,

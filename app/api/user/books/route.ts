@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
-import { isAuthorizedRequest } from "@/utils/auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
 function getPaginationParams(request: NextRequest) {
@@ -23,75 +22,6 @@ function unauthorizedResponse() {
   );
 }
 
-export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return unauthorizedResponse();
-  }
-
-  try {
-    const body = await request.json();
-    const { title, author, categoryId, stock } = body;
-
-    if (!title || !author || !categoryId || stock == null) {
-      return NextResponse.json(
-        {
-          success: false,
-          status: 400,
-          message: "Missing required fields",
-        },
-        { status: 400 },
-      );
-    }
-
-    const normalizedCategoryId = Number(categoryId);
-    let category = await prisma.category.findFirst({
-      where: { id: normalizedCategoryId, deletedAt: null },
-    });
-
-    if (!category) {
-      return NextResponse.json(
-        {
-          success: false,
-          status: 404,
-          message: "Category not found",
-        },
-        { status: 404 },
-      );
-    }
-
-    const book = await prisma.book.create({
-      data: {
-        title,
-        author,
-        stock: parseInt(stock),
-        categoryId: category.id,
-      },
-      include: { category: true },
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        status: 201,
-        message: "Book created successfully",
-        book,
-      },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error("Error creating book:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        status: 500,
-        message: "Internal server error",
-      },
-      { status: 500 },
-    );
-  }
-}
-
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -103,7 +33,7 @@ export async function GET(request: NextRequest) {
     const [books, total, stockAggregate] = await Promise.all([
       prisma.book.findMany({
         where: { deletedAt: null },
-        include: { category: true },
+        include: { category: true, image: true },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -149,6 +79,75 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return unauthorizedResponse();
+  }
+
+  try {
+    const body = await request.json();
+    const { title, author, categoryId, imageId, stock } = body;
+
+    if (!title || !author || !categoryId || !imageId || stock == null) {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 400,
+          message: "Missing required fields",
+        },
+        { status: 400 },
+      );
+    }
+
+    let category = await prisma.category.findFirst({
+      where: { id: categoryId, deletedAt: null },
+    });
+
+    if (!category) {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 404,
+          message: "Category not found",
+        },
+        { status: 404 },
+      );
+    }
+
+    const book = await prisma.book.create({
+      data: {
+        title,
+        author,
+        stock: parseInt(stock),
+        categoryId: category.id,
+        imageId: imageId.id,
+      },
+      include: { category: true, image: true },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        status: 201,
+        message: "Book created successfully",
+        book,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("Error creating book:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        status: 500,
+        message: "Internal server error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -157,9 +156,9 @@ export async function DELETE(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const id = Number(body?.id);
+    const id = body?.id;
 
-    if (!id || Number.isNaN(id)) {
+    if (!id) {
       return NextResponse.json(
         {
           success: false,
@@ -217,9 +216,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const normalizedCategoryId = Number(categoryId);
     let category = await prisma.category.findFirst({
-      where: { id: normalizedCategoryId, deletedAt: null },
+      where: { id: categoryId, deletedAt: null },
     });
 
     if (!category) {

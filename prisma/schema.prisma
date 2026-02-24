@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider   = "prisma-client"
-  output     = "../app/generated/prisma"
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
@@ -14,33 +14,44 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String   
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
   name      String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   deletedAt DateTime?
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
+  id        String    @id @default(uuid())
   name      String
-  books     Book[]   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  books     Book[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  title       String
-  author      String
-  stock       Int
-  categoryId  Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  id         String    @id @default(uuid())
+  title      String
+  author     String
+  stock      Int
+  categoryId String?
+  imageId    String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
 
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  image    Image?    @relation(fields: [imageId], references: [id], onDelete: SetNull)
+}
+
+model Image {
+  id        String    @id @default(uuid())
+  path      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  books     Book[]
 }

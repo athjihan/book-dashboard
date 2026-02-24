@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import AddBookButton from "../components/AddBookButton";
 import LogoutButton from "../components/LogoutButton";
 import EditBookButton from "../components/EditBookButton";
@@ -282,6 +282,7 @@ export default function DashboardPage() {
               <table className="catalog-books-table text-body-responsive  w-full border-collapse text-left">
                 <thead className="text-small-responsive bg-zinc-100 uppercase tracking-wide text-zinc-600">
                   <tr>
+                    <th className="px-6 py-4">Gambar</th>
                     <th className="px-6 py-4">Judul</th>
                     <th className="px-6 py-4">Penulis</th>
                     <th className="px-6 py-4">Kategori</th>
@@ -293,6 +294,17 @@ export default function DashboardPage() {
                 <tbody>
                   {books.map((book) => (
                     <tr key={book.id} className="border-t border-zinc-200">
+                      <td className="px-6 py-4">
+                        {book.image?.path ? (
+                          <img
+                            src={book.image.path}
+                            alt={book.title}
+                            className="h-16 w-16 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="h-16 w-16 rounded-md bg-zinc-200"></div>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-small-responsive text-zinc-900">
                         {book.title}
                       </td>

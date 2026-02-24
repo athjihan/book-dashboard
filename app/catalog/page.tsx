@@ -2,25 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
-type Book = {
-  id: number;
-  title: string;
-  author: string;
-  stock: number;
-  updatedAt: string;
-  category: {
-    name: string;
-  } | null;
-};
-
-type Category = {
-  id: number;
-  name: string;
-  _count: {
-    books: number;
-  };
-};
+import type { Book, Category } from "../types/catalog";
 
 export default function PublicBooksPage() {
   const bookPageSize = 5;
@@ -179,6 +161,7 @@ export default function PublicBooksPage() {
               <table className="catalog-books-table text-body-responsive  w-full border-collapse text-left">
                 <thead className="text-small-responsive bg-zinc-100 uppercase tracking-wide text-zinc-600">
                   <tr>
+                    <th className="px-6 py-4">Gambar</th>
                     <th className="px-6 py-4">Judul</th>
                     <th className="px-6 py-4">Penulis</th>
                     <th className="px-6 py-4">Kategori</th>
@@ -189,6 +172,17 @@ export default function PublicBooksPage() {
                 <tbody>
                   {books.map((book) => (
                     <tr key={book.id} className="border-t border-zinc-200">
+                      <td className="px-6 py-4 text-small-responsive text-zinc-900">
+                        {book.image?.path ? (
+                          <img
+                            src={book.image.path}
+                            alt={book.title}
+                            className="h-12 w-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-md bg-zinc-200"></div>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-small-responsive text-zinc-900">
                         {book.title}
                       </td>
