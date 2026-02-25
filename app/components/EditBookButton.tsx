@@ -13,6 +13,21 @@ type EditBookButtonProps = {
   onSubmit: (bookId: string, data: BookFormPayload) => Promise<void>;
 };
 
+// extract original filename by removing random suffix (format: "name-abc123.ext" -> "name.ext")
+function getOriginalFileName(filePath: string): string {
+  const fileName = filePath.split("/").pop() ?? "";
+  const lastDotIndex = fileName.lastIndexOf(".");
+  if (lastDotIndex === -1) return fileName;
+
+  const extension = fileName.substring(lastDotIndex);
+  const nameWithoutExt = fileName.substring(0, lastDotIndex);
+
+  // remove suffix pattern "-xxxxxx" (6 random chars)
+  const nameWithoutSuffix = nameWithoutExt.replace(/-[a-z0-9]{6}$/i, "");
+
+  return nameWithoutSuffix + extension;
+}
+
 export default function EditBookButton({
   book,
   onSubmit,
@@ -72,7 +87,7 @@ export default function EditBookButton({
     setUploadError("");
     setFileName(
       book.imagePath
-        ? (book.imagePath.split("/").pop() ?? "Belum ada file dipilih")
+        ? getOriginalFileName(book.imagePath)
         : "Belum ada file dipilih",
     );
   }, [isOpen, book]);
@@ -98,7 +113,7 @@ export default function EditBookButton({
 
     setFileName(
       book.imagePath
-        ? (book.imagePath.split("/").pop() ?? "Belum ada file dipilih")
+        ? getOriginalFileName(book.imagePath)
         : "Belum ada file dipilih",
     );
   };
