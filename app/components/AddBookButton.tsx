@@ -31,7 +31,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
       setCategoryError("");
 
       try {
-        const response = await fetch(`/api/user/categories`, {
+        const response = await fetch(`/api/admin/categories`, {
           method: "GET",
           cache: "no-store",
         });
@@ -83,7 +83,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const uploadRes = await fetch("/api/user/upload", {
+      const uploadRes = await fetch("/api/admin/upload", {
         method: "POST",
         body: formData,
       });

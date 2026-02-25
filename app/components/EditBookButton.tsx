@@ -53,7 +53,7 @@ export default function EditBookButton({
       setCategoryError("");
 
       try {
-        const response = await fetch(`/api/user/categories`, {
+        const response = await fetch(`/api/admin/categories`, {
           method: "GET",
           cache: "no-store",
         });
@@ -110,12 +110,6 @@ export default function EditBookButton({
       setUploadError("");
       return;
     }
-
-    setFileName(
-      book.imagePath
-        ? getOriginalFileName(book.imagePath)
-        : "Belum ada file dipilih",
-    );
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -133,7 +127,7 @@ export default function EditBookButton({
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        const uploadRes = await fetch("/api/user/upload", {
+        const uploadRes = await fetch("/api/admin/upload", {
           method: "POST",
           body: formData,
         });

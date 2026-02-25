@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { isAuthorizedRequest } from "@/utils/auth";
 
 function getPaginationParams(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -143,6 +142,22 @@ export async function PUT(request: NextRequest) {
           message: "Missing required fields",
         },
         { status: 400 },
+      );
+    }
+
+    const existingCategory = await prisma.category.findUnique({
+      where: { id },
+    });
+
+    if (categoryName === existingCategory?.name) {
+      return NextResponse.json(
+        {
+          success: true,
+          status: 200,
+          message: "No changes detected",
+          category: existingCategory,
+        },
+        { status: 200 },
       );
     }
 

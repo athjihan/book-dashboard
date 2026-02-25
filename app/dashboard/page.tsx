@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
   const handleAddBook = async (data: BookFormPayload) => {
     try {
-      const response = await fetch(`/api/user/books`, {
+      const response = await fetch(`/api/admin/books`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
   const handleEditBook = async (bookId: string, data: BookFormPayload) => {
     try {
-      const response = await fetch(`/api/user/books`, {
+      const response = await fetch(`/api/admin/books`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, id: bookId }),
@@ -69,7 +69,7 @@ export default function DashboardPage() {
 
   const handleDeleteBook = async (bookId: string) => {
     try {
-      const response = await fetch("/api/user/books", {
+      const response = await fetch("/api/admin/books", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: bookId }),
@@ -88,7 +88,7 @@ export default function DashboardPage() {
 
   const handleAddCategory = async (data: CategoryFormPayload) => {
     try {
-      const response = await fetch("/api/user/categories", {
+      const response = await fetch("/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -109,7 +109,7 @@ export default function DashboardPage() {
     data: CategoryFormPayload,
   ) => {
     try {
-      const response = await fetch("/api/user/categories", {
+      const response = await fetch("/api/admin/categories", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, id: categoryId }),
@@ -127,7 +127,7 @@ export default function DashboardPage() {
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
-      const response = await fetch("/api/user/categories", {
+      const response = await fetch("/api/admin/categories", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: categoryId }),
@@ -151,11 +151,11 @@ export default function DashboardPage() {
 
     try {
       const [booksResponse, categoriesResponse] = await Promise.all([
-        fetch(`/api/user/books?page=${bookPage}&pageSize=${bookPageSize}`, {
+        fetch(`/api/admin/books?page=${bookPage}&pageSize=${bookPageSize}`, {
           signal: controller.signal,
         }),
         fetch(
-          `/api/user/categories?page=${categoryPage}&pageSize=${categoryPageSize}`,
+          `/api/admin/categories?page=${categoryPage}&pageSize=${categoryPageSize}`,
         ),
       ]);
 
