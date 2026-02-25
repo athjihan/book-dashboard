@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     const [books, total, stockAggregate] = await Promise.all([
       prisma.book.findMany({
         where: { deletedAt: null },
-        include: { category: true, image: true },
+        include: { category: true },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,

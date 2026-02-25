@@ -7,10 +7,7 @@ export type Book = {
   category: {
     name: string;
   } | null;
-  image: {
-    path: string;
-    name: string;
-  } | null;
+  imagePath: string;
 };
 
 export type Category = {

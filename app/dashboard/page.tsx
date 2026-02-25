@@ -295,9 +295,9 @@ export default function DashboardPage() {
                   {books.map((book) => (
                     <tr key={book.id} className="border-t border-zinc-200">
                       <td className="px-6 py-4">
-                        {book.image?.path ? (
+                        {book.imagePath ? (
                           <img
-                            src={book.image.path}
+                            src={book.imagePath}
                             alt={book.title}
                             className="h-16 w-16 object-cover rounded-md"
                           />

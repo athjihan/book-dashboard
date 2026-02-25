@@ -38,21 +38,10 @@ model Book {
   author     String
   stock      Int
   categoryId String?
-  imageId    String?
+  imagePath  String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
 
   category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  image    Image?    @relation(fields: [imageId], references: [id], onDelete: SetNull)
-}
-
-model Image {
-  id        String    @id @default(uuid())
-  path      String
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  books     Book[]
 }

@@ -62,26 +62,6 @@ body {
   justify-self: end;
 }
 
-.text-title-responsive {
-  font-size: 1.875rem;
-  line-height: 2.25rem;
-}
-
-.text-subtitle-responsive {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
-.text-body-responsive {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-}
-
-.text-small-responsive {
-  font-size: 1rem;
-  line-height: 1.5rem;
-}
-
 /* tablet styles */
 @media (max-width: 1023px) {
   .page-responsive {
@@ -95,51 +75,11 @@ body {
   .catalog-category-panel {
     justify-self: stretch;
   }
-
-  .text-title-responsive {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
-
-  .text-subtitle-responsive {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
-
-  .text-body-responsive {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
-
-  .text-small-responsive {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
 }
 
 /* mobile styles */
 @media (max-width: 767px) {
   .page-responsive {
     padding: 1.5rem 1rem;
-  }
-
-  .text-title-responsive {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
-  }
-
-  .text-subtitle-responsive {
-    font-size: 1rem;
-    line-height: 1.5rem;
-  }
-
-  .text-body-responsive {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-
-  .text-small-responsive {
-    font-size: 0.75rem;
-    line-height: 1rem;
   }
 }

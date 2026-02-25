@@ -173,9 +173,9 @@ export default function PublicBooksPage() {
                   {books.map((book) => (
                     <tr key={book.id} className="border-t border-zinc-200">
                       <td className="px-6 py-4 text-xs md:text-sm lg:text-base text-zinc-900">
-                        {book.image?.path ? (
+                        {book.imagePath ? (
                           <img
-                            src={book.image.path}
+                            src={book.imagePath}
                             alt={book.title}
                             className="h-12 w-12 object-cover rounded-md"
                           />

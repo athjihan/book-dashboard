@@ -3,12 +3,6 @@ export type BookCategory = {
   name: string;
 };
 
-export type BookImage = {
-  id: string;
-  path: string;
-  name: string;
-};
-
 export type BookItem = {
   id: string;
   title: string;
@@ -16,7 +10,7 @@ export type BookItem = {
   stock: number;
   updatedAt: string;
   category: BookCategory | null;
-  image: BookImage | null;
+  imagePath: string;
 };
 
 export type CategoryItem = {
@@ -47,7 +41,6 @@ export type BookFormPayload = {
   categoryId: string;
   stock: number;
   imagePath: string;
-  imageName: string;
 };
 
 export type CategoryFormPayload = {

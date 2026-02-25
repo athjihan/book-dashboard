@@ -15,7 +15,6 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [categoryError, setCategoryError] = useState("");
   const [fileName, setFileName] = useState("Belum ada file dipilih");
-  const [fileImage, setFileImage] = useState<File | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState("");
 
@@ -59,15 +58,10 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setFileImage(file);
       setFileName(file.name);
       setUploadError("");
       return;
     }
-
-    setSelectedFile(null);
-    setFileImage(null);
-    setFileName("Belum ada file dipilih");
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -83,7 +77,6 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
 
     try {
       let uploadedPath: string;
-      let uploadedName: string;
 
       // upload file jika ada -> biar dpt path
 
@@ -102,21 +95,18 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
 
       const uploadData = await uploadRes.json();
       uploadedPath = uploadData.data.path;
-      uploadedName = uploadData?.data?.name;
 
       const data: BookFormPayload = {
         title: title,
         author: author,
         categoryId: categoryId,
         stock: Number(stock),
-        imagePath: uploadedPath || "",
-        imageName: uploadedName || "",
+        imagePath: uploadedPath,
       };
 
       await onSubmit(data);
       setIsOpen(false);
       setSelectedFile(null);
-      setFileImage(null);
       setFileName("Belum ada file dipilih");
       setTitle("");
       setAuthor("");
@@ -134,7 +124,6 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
   const handleCloseModal = () => {
     setIsOpen(false);
     setSelectedFile(null);
-    setFileImage(null);
     setFileName("Belum ada file dipilih");
     setUploadError("");
     setTitle("");
@@ -190,9 +179,9 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                   className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
                 >
                   <div className="h-4 w-4" aria-hidden="true">
-                    {fileImage ? (
+                    {selectedFile ? (
                       <img
-                        src={URL.createObjectURL(fileImage)}
+                        src={URL.createObjectURL(selectedFile)}
                         alt="Preview"
                         className="h-4 w-4"
                       />

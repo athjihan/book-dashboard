@@ -8,7 +8,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "Andrea Hirata",
       stock: 5,
       categoryId: "11111111-1111-1111-1111-111111111112",
-      imageId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
+      imagePath: "/laskar-pelangi.jpg",
     },
     {
       id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb02",
@@ -16,7 +16,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "Pramoedya Ananta Toer",
       stock: 3,
       categoryId: "22222222-2222-2222-2222-222222222221",
-      imageId: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2",
+      imagePath: "/bumi-manusia.jpg",
     },
     {
       id: "cccccccc-cccc-cccc-cccc-ccccccccccc03",
@@ -24,7 +24,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "Robert C. Martin",
       stock: 10,
       categoryId: "33333333-3333-3333-3333-333333333331",
-      imageId: "cccccccc-cccc-cccc-cccc-ccccccccccc3",
+      imagePath: "/clean-code.jpg",
     },
     {
       id: "dddddddd-dddd-dddd-dddd-dddddddddddd04",
@@ -32,7 +32,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "Andrew Hunt",
       stock: 8,
       categoryId: "22222222-2222-2222-2222-222222222221",
-      imageId: "dddddddd-dddd-dddd-dddd-dddddddddddd4",
+      imagePath: "/the-pragmatic-programmer.jpg",
     },
     {
       id: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee05",
@@ -40,7 +40,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "Adam Wathan",
       stock: 4,
       categoryId: "66666666-6666-6666-6666-666666666661",
-      imageId: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeee5",
+      imagePath: "/refactoring-ui.jpg",
     },
     {
       id: "ffffffff-ffff-ffff-ffff-fffffffffff06",
@@ -48,7 +48,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "James Clear",
       stock: 15,
       categoryId: "33333333-3333-3333-3333-333333333331",
-      imageId: "ffffffff-ffff-ffff-ffff-fffffffffff6",
+      imagePath: "/atomic-habits.jpg",
     },
     {
       id: "gggggggg-gggg-gggg-gggg-ggggggggggg07",
@@ -56,7 +56,7 @@ export async function bookSeeder(prisma: PrismaClient) {
       author: "Henry Manampiring",
       stock: 7,
       categoryId: "55555555-5555-5555-5555-555555555551",
-      imageId: "gggggggg-gggg-gggg-gggg-ggggggggggg7",
+      imagePath: "/filosofi-teras.jpg",
     },
   ];
 

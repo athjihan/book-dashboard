@@ -16,10 +16,10 @@ function unauthorizedResponse() {
 }
 
 function generateFileName(originalName: string): string {
-  const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   const ext = path.extname(originalName);
-  return `${timestamp}-${random}${ext}`;
+  const nameWithoutExt = path.basename(originalName, ext);
+  return `${nameWithoutExt}-${random}${ext}`;
 }
 
 export async function POST(request: NextRequest) {
@@ -88,8 +88,6 @@ export async function POST(request: NextRequest) {
         message: "File uploaded successfully",
         data: {
           path: publicPath,
-          name: file.name,
-          storedName: fileName,
         },
       },
       { status: 200 },

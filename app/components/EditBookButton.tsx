@@ -24,7 +24,6 @@ export default function EditBookButton({
   const [categoryError, setCategoryError] = useState("");
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewImagePath, setPreviewImagePath] = useState("");
   const [uploadError, setUploadError] = useState("");
 
   const [title, setTitle] = useState("");
@@ -69,14 +68,12 @@ export default function EditBookButton({
     setAuthor(book.author);
     setCategoryId(book.category?.id ?? "");
     setStock(String(book.stock));
-    setSelectedFile(null);
+    setSelectedFile(book.imagePath ? null : null);
     setUploadError("");
-    setPreviewImagePath(book.image?.path ?? "");
     setFileName(
-      book.image?.name ||
-        (book.image?.path
-          ? (book.image.path.split("/").pop() ?? "Belum ada file dipilih")
-          : "Belum ada file dipilih"),
+      book.imagePath
+        ? (book.imagePath.split("/").pop() ?? "Belum ada file dipilih")
+        : "Belum ada file dipilih",
     );
   }, [isOpen, book]);
 
@@ -84,7 +81,6 @@ export default function EditBookButton({
     if (!selectedFile) return;
 
     const objectUrl = URL.createObjectURL(selectedFile);
-    setPreviewImagePath(objectUrl);
 
     return () => {
       URL.revokeObjectURL(objectUrl);
@@ -100,14 +96,11 @@ export default function EditBookButton({
       return;
     }
 
-    setSelectedFile(null);
     setFileName(
-      book.image?.name ||
-        (book.image?.path
-          ? (book.image.path.split("/").pop() ?? "Belum ada file dipilih")
-          : "Belum ada file dipilih"),
+      book.imagePath
+        ? (book.imagePath.split("/").pop() ?? "Belum ada file dipilih")
+        : "Belum ada file dipilih",
     );
-    setPreviewImagePath(book.image?.path ?? "");
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -118,7 +111,6 @@ export default function EditBookButton({
 
     try {
       let uploadedPath: string | undefined;
-      let uploadedName: string | undefined;
 
       // upload file jika user pilih file baru
 
@@ -138,7 +130,6 @@ export default function EditBookButton({
 
         const uploadData = await uploadRes.json();
         uploadedPath = uploadData?.data?.path ?? "";
-        uploadedName = uploadData?.data?.name ?? "";
       }
 
       const data: BookFormPayload = {
@@ -146,15 +137,13 @@ export default function EditBookButton({
         author: author,
         categoryId: categoryId,
         stock: Number(stock),
-        imagePath: uploadedPath || book.image?.path || "",
-        imageName: uploadedName || book.image?.name || "",
+        imagePath: uploadedPath || book.imagePath || "",
       };
 
       await onSubmit(book.id, data);
 
       setIsOpen(false);
       setSelectedFile(null);
-      setPreviewImagePath("");
       setFileName("Belum ada file dipilih");
       setTitle("");
       setAuthor("");
@@ -172,7 +161,6 @@ export default function EditBookButton({
   const handleCloseModal = () => {
     setIsOpen(false);
     setSelectedFile(null);
-    setPreviewImagePath("");
     setFileName("Belum ada file dipilih");
     setUploadError("");
     setTitle("");
@@ -223,10 +211,16 @@ export default function EditBookButton({
                   className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
                 >
                   <div className="h-4 w-4" aria-hidden="true">
-                    {previewImagePath ? (
+                    {selectedFile ? (
                       <img
-                        src={previewImagePath}
+                        src={URL.createObjectURL(selectedFile)}
                         alt="Preview"
+                        className="h-4 w-4 rounded object-cover"
+                      />
+                    ) : book.imagePath ? (
+                      <img
+                        src={book.imagePath}
+                        alt="Current"
                         className="h-4 w-4 rounded object-cover"
                       />
                     ) : (

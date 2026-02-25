@@ -37,9 +37,8 @@ export async function GET(request: NextRequest) {
         where: { deletedAt: null },
         include: {
           category: true,
-          image: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -92,16 +91,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, author, categoryId, imagePath, imageName, stock } = body;
+    const { title, author, categoryId, imagePath, stock } = body;
 
-    if (
-      !title ||
-      !author ||
-      !categoryId ||
-      !imagePath ||
-      !imageName ||
-      stock == null
-    ) {
+    if (!title || !author || !categoryId || !imagePath || stock == null) {
       return NextResponse.json(
         {
           success: false,
@@ -127,23 +119,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let imageId: string | null = null;
-    if (imagePath) {
-      const image = await prisma.image.create({
-        data: { path: imagePath, name: imageName },
-      });
-      imageId = image.id;
-    }
-
     const book = await prisma.book.create({
       data: {
         title,
         author,
         stock: parseInt(stock),
         categoryId: category.id,
-        imageId: imageId,
+        imagePath,
       },
-      include: { category: true, image: true },
+      include: { category: true },
     });
 
     return NextResponse.json(
@@ -191,7 +175,6 @@ export async function DELETE(request: NextRequest) {
 
     const existingBook = await prisma.book.findFirst({
       where: { id, deletedAt: null },
-      include: { image: true },
     });
 
     if (!existingBook) {
@@ -210,25 +193,13 @@ export async function DELETE(request: NextRequest) {
       data: { deletedAt: new Date() },
     });
 
-    if (existingBook.imageId) {
-      await prisma.image.update({
-        where: { id: existingBook.imageId },
-        data: { deletedAt: new Date() },
-      });
+    const imagePath = path.join(
+      process.cwd(),
+      "public",
+      existingBook.imagePath,
+    );
 
-      if (existingBook.image?.path) {
-        const publicFilePath = path.join(
-          process.cwd(),
-          "public",
-          existingBook.image.path.replace(/^\//, ""),
-        );
-        try {
-          await unlink(publicFilePath);
-        } catch {
-          // ignore file delete errors (file may not exist)
-        }
-      }
-    }
+    await unlink(imagePath);
 
     return NextResponse.json(
       {
@@ -259,7 +230,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, title, author, categoryId, stock, imagePath, imageName } = body;
+    const { id, title, author, categoryId, stock, imagePath } = body;
 
     if (
       !id ||
@@ -267,7 +238,6 @@ export async function PUT(request: NextRequest) {
       !author ||
       !categoryId ||
       !imagePath ||
-      !imageName ||
       stock == null
     ) {
       return NextResponse.json(
@@ -297,7 +267,7 @@ export async function PUT(request: NextRequest) {
 
     const existingBook = await prisma.book.findFirst({
       where: { id, deletedAt: null },
-      include: { image: true },
+      include: { category: true },
     });
 
     if (!existingBook) {
@@ -311,33 +281,22 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    let nextImageId: string | null = existingBook.imageId;
-
-    if (imagePath) {
-      const newImage = await prisma.image.create({
-        data: { path: imagePath, name: imageName || null },
-      });
-      nextImageId = newImage.id;
-
-      if (existingBook.image?.id) {
-        await prisma.image.update({
-          where: { id: existingBook.image.id },
-          data: { deletedAt: new Date() },
-        });
-
-        if (existingBook.image.path) {
-          const publicFilePath = path.join(
-            process.cwd(),
-            "public",
-            existingBook.image.path.replace(/^\//, ""),
-          );
-          try {
-            await unlink(publicFilePath);
-          } catch {
-            // ignore file delete errors (file may not exist)
-          }
-        }
-      }
+    if (
+      title === existingBook.title &&
+      author === existingBook.author &&
+      categoryId === existingBook.categoryId &&
+      stock === existingBook.stock &&
+      imagePath === existingBook.imagePath
+    ) {
+      return NextResponse.json(
+        {
+          success: true,
+          status: 200,
+          message: "No changes detected",
+          book: existingBook,
+        },
+        { status: 200 },
+      );
     }
 
     const book = await prisma.book.update({
@@ -345,15 +304,23 @@ export async function PUT(request: NextRequest) {
       data: {
         title,
         author,
-        stock: parseInt(stock),
+        stock,
         categoryId: category.id,
-        imageId: nextImageId,
+        imagePath,
       },
       include: {
         category: true,
-        image: true,
       },
     });
+
+    if (imagePath !== existingBook.imagePath) {
+      const oldImagePath = path.join(
+        process.cwd(),
+        "public",
+        existingBook.imagePath,
+      );
+      await unlink(oldImagePath);
+    }
 
     return NextResponse.json(
       {
