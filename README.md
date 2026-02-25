@@ -26,13 +26,15 @@ A small library dashboard built with Next.js App Router, Prisma, and PostgreSQL.
 ## API Endpoints
 
 - `GET /api/books` (public, paginated)
-- `POST /api/books` (auth required)
-- `PUT /api/books` (auth required)
-- `DELETE /api/books` (auth required)
 - `GET /api/categories` (public, paginated)
-- `POST /api/categories` (auth required)
-- `PUT /api/categories` (auth required)
-- `DELETE /api/categories` (auth required)
+- `GET /api/admin/books` (auth required)
+- `POST /api/admin/books` (auth required)
+- `PUT /api/admin/books` (auth required)
+- `DELETE /api/admin/books` (auth required)
+- `GET /api/admin/categories` (auth required)
+- `POST /api/admin/categories` (auth required)
+- `PUT /api/admin/categories` (auth required)
+- `DELETE /api/admin/categories` (auth required)
 
 ## Environment Variables
 
