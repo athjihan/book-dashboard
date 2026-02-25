@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Edit, FileImage } from "lucide-react";
+import { Edit, Upload, FileImage } from "lucide-react";
 import type {
   BookCategory,
   BookFormPayload,
@@ -40,6 +40,7 @@ export default function EditBookButton({
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -110,6 +111,40 @@ export default function EditBookButton({
       setUploadError("");
       return;
     }
+  };
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    setFileName(file.name);
+    setUploadError("");
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const nextTarget = event.relatedTarget as Node | null;
+    if (nextTarget && event.currentTarget.contains(nextTarget)) {
+      return;
+    }
+    setIsDragging(false);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -215,29 +250,47 @@ export default function EditBookButton({
                   className="hidden"
                   onChange={handleFileChange}
                 />
-                <label
-                  htmlFor="book-image"
-                  className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  className={`rounded-2xl border-2 border-dashed bg-zinc-100 px-6 py-8 text-center transition ${
+                    isDragging
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-zinc-300"
+                  }`}
                 >
-                  <div className="h-4 w-4" aria-hidden="true">
-                    {selectedFile ? (
-                      <img
-                        src={URL.createObjectURL(selectedFile)}
-                        alt="Preview"
-                        className="h-4 w-4 rounded object-cover"
-                      />
-                    ) : book.imagePath ? (
-                      <img
-                        src={book.imagePath}
-                        alt="Current"
-                        className="h-4 w-4 rounded object-cover"
-                      />
-                    ) : (
-                      <FileImage className="h-4 w-4" aria-hidden="true" />
-                    )}
+                  <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 text-blue-500">
+                    <Upload className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <div className="mt-1 text-xs text-zinc-500">{fileName}</div>
-                </label>
+                  <p className="text-xs md:text-sm lg:text-base text-zinc-700">
+                    Pilih file atau drag and drop
+                  </p>
+                  <label
+                    htmlFor="book-image"
+                    className="inline-flex w-fit cursor-pointer items-center gap-2 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
+                  >
+                    <div className="h-4 w-4" aria-hidden="true">
+                      {selectedFile ? (
+                        <img
+                          src={URL.createObjectURL(selectedFile)}
+                          alt="Preview"
+                          className="h-4 w-4 rounded object-cover"
+                        />
+                      ) : book.imagePath ? (
+                        <img
+                          src={book.imagePath}
+                          alt="Current"
+                          className="h-4 w-4 rounded object-cover"
+                        />
+                      ) : (
+                        <FileImage className="h-4 w-4" aria-hidden="true" />
+                      )}
+                    </div>
+                    <div className="mt-1 text-xs text-zinc-500">{fileName}</div>
+                  </label>
+                </div>
                 {uploadError && (
                   <span className="text-xs font-normal text-red-600">
                     {uploadError}

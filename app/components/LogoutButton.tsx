@@ -11,7 +11,7 @@ export default function LogoutButton() {
       className="text-sm md:text-base lg:text-lg inline-flex items-center justify-center rounded-3xl bg-zinc-400 px-4 py-2 font-semibold text-white hover:bg-green-700 absolute right-6 top-6 gap-2"
     >
       <LogOut className="h-4 w-4" aria-hidden="true" />
-      <span>Logout</span>
+      <span>Keluar</span>
     </button>
   );
 }

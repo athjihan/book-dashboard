@@ -218,7 +218,7 @@ export default function DashboardPage() {
     <section className="relative flex min-h-screen flex-col gap-6 bg-zinc-50 px-4 py-6 text-zinc-900 md:px-6 md:py-8 lg:px-8 lg:py-10">
       <header className="space-y-2">
         <p className="text-base md:text-lg lg:text-xl font-semibold uppercase tracking-[0.2em] text-zinc-500">
-          Dashboard
+          Dasbor
         </p>
         <LogoutButton />
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-zinc-900">
@@ -246,7 +246,7 @@ export default function DashboardPage() {
           <p className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-zinc-500">
             Total Kategori
           </p>
-          <p className="text-sm md:text-base lg:text-lg mt-2 font-semibold text-zinc-900">
+          <p className="text-base md:text-lg lg:text-xl mt-2 font-semibold text-zinc-900">
             {totalCategoryCount}
           </p>
         </div>
@@ -255,7 +255,7 @@ export default function DashboardPage() {
             <span className="block sm:inline">Total</span>
             <span className="block sm:ml-1 sm:inline">Stok</span>
           </p>
-          <p className="text-sm md:text-base lg:text-lg mt-2 font-semibold text-zinc-900">
+          <p className="text-base md:text-lg lg:text-xl mt-2 font-semibold text-zinc-900">
             {totalStock}
           </p>
         </div>

@@ -48,7 +48,7 @@ export default function SignInPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">
             Admin
           </p>
-          <h1 className="text-2xl font-bold text-zinc-900">Sign In</h1>
+          <h1 className="text-2xl font-bold text-zinc-900">Masuk</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
@@ -99,7 +99,7 @@ export default function SignInPage() {
             disabled={isSubmitting}
             className="inline-flex w-full items-center justify-center rounded-3xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting ? "Loading..." : "Login"}
+            {isSubmitting ? "Memuat..." : "Masuk"}
           </button>
         </form>
       </section>

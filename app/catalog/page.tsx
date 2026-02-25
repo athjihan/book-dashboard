@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LogIn } from "lucide-react";
 import Link from "next/link";
 import type { Book, Category } from "../types/catalog";
 
@@ -66,7 +67,7 @@ export default function PublicBooksPage() {
       setCategoryTotalPages(categoriesResult.meta?.totalPages ?? 1);
     } catch (err) {
       if (!controller.signal.aborted) {
-        setError("Terjadi kesalahan saat mengambil data dashboard.");
+        setError("Terjadi kesalahan saat mengambil data dasbor.");
       }
     } finally {
       if (!controller.signal.aborted) {
@@ -107,7 +108,8 @@ export default function PublicBooksPage() {
           href="/auth/signin?callbackUrl=/dashboard"
           className="text-sm md:text-base lg:text-lg inline-flex items-center justify-center rounded-3xl bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 absolute right-6 top-6"
         >
-          Login
+          <LogIn className="h-4 w-4 mr-2" aria-hidden="true" />
+          Masuk
         </Link>
       </header>
 
@@ -128,7 +130,7 @@ export default function PublicBooksPage() {
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-zinc-500">
+          <p className="text-base md:text-lg lg:text-xl font-semibold uppercase tracking-wide text-zinc-500">
             Total Kategori
           </p>
           <p className="text-sm md:text-base lg:text-lg mt-2 font-semibold text-zinc-900">
@@ -136,7 +138,7 @@ export default function PublicBooksPage() {
           </p>
         </div>
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <p className="text-xs md:text-sm lg:text-base font-semibold uppercase tracking-wide text-zinc-500">
+          <p className="text-base md:text-lg lg:text-xl font-semibold uppercase tracking-wide text-zinc-500">
             <span className="block sm:inline">Total</span>
             <span className="block sm:ml-1 sm:inline">Stok</span>
           </p>
