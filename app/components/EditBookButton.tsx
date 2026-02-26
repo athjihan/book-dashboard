@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { Edit, Upload, FileImage } from "lucide-react";
 import type {
   BookCategory,
-  BookFormPayload,
+  UpdateBookFormPayload,
   BookItem,
 } from "../types/dashboard";
 
 type EditBookButtonProps = {
   book: BookItem;
-  onSubmit: (bookId: string, data: BookFormPayload) => Promise<void>;
+  onSubmit: (bookId: string, data: UpdateBookFormPayload) => Promise<void>;
 };
 
 // extract original filename by removing random suffix (format: "name-abc123.ext" -> "name.ext")
@@ -150,38 +150,15 @@ export default function EditBookButton({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setUploadError("");
-
     setIsLoading(true);
 
     try {
-      let uploadedPath: string | undefined;
-
-      // upload file jika user pilih file baru
-
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-
-        const uploadRes = await fetch("/api/admin/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const errorData = await uploadRes.json();
-          throw new Error(errorData.message || "Gagal upload gambar");
-        }
-
-        const uploadData = await uploadRes.json();
-        uploadedPath = uploadData?.data?.path ?? "";
-      }
-
-      const data: BookFormPayload = {
-        title: title,
-        author: author,
-        categoryId: categoryId,
+      const data: UpdateBookFormPayload = {
+        title,
+        author,
+        categoryId,
         stock: Number(stock),
-        imagePath: uploadedPath || book.imagePath || "",
+        ...(selectedFile ? { image: selectedFile } : {}),
       };
 
       await onSubmit(book.id, data);
@@ -269,7 +246,7 @@ export default function EditBookButton({
                   </p>
                   <label
                     htmlFor="book-image"
-                    className="inline-flex w-fit cursor-pointer items-center gap-2 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
+                    className="inline-flex w-fit cursor-pointer items-center gap-1 x-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
                   >
                     <div className="h-4 w-4" aria-hidden="true">
                       {selectedFile ? (

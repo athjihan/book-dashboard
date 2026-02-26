@@ -20,8 +20,14 @@ export default function DeleteBookButton({
     event.preventDefault();
     setIsLoading(true);
 
-    await onSubmit(book.id).finally(() => setIsLoading(false));
-    setIsOpen(false);
+    try {
+      await onSubmit(book.id);
+    } catch (error) {
+      console.error("Error deleting book:", error);
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
+    }
   };
 
   return (

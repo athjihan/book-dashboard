@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Upload, FileImage } from "lucide-react";
-import type { BookCategory, BookFormPayload } from "../types/dashboard";
+import type { BookCategory, CreateBookFormPayload } from "../types/dashboard";
 
 type AddBookButtonProps = {
-  onSubmit: (data: BookFormPayload) => Promise<void>;
+  onSubmit: (data: CreateBookFormPayload) => Promise<void>;
 };
 
 export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
@@ -15,10 +15,9 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [categoryError, setCategoryError] = useState("");
   const [fileName, setFileName] = useState("Belum ada file dipilih");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [image, setImage] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -55,20 +54,16 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     fetchCategories();
   }, [isOpen]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setFileName(file.name);
-      setUploadError("");
-      return;
-    }
-  };
-
   const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
+    setImage(file);
     setFileName(file.name);
     setUploadError("");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    handleFileSelect(file);
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -103,53 +98,25 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
     event.preventDefault();
     setUploadError("");
 
-    if (!selectedFile) {
+    if (!image) {
       setUploadError("Gambar wajib diunggah");
       return;
     }
 
     setIsLoading(true);
-
     try {
-      let uploadedPath: string;
-
-      // upload file jika ada -> biar dpt path
-
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-
-      const uploadRes = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
+      await onSubmit({
+        title,
+        author,
+        categoryId,
+        stock: Number(stock),
+        image,
       });
 
-      if (!uploadRes.ok) {
-        const errorData = await uploadRes.json();
-        throw new Error(errorData.message || "Gagal upload gambar");
-      }
-
-      const uploadData = await uploadRes.json();
-      uploadedPath = uploadData.data.path;
-
-      const data: BookFormPayload = {
-        title: title,
-        author: author,
-        categoryId: categoryId,
-        stock: Number(stock),
-        imagePath: uploadedPath,
-      };
-
-      await onSubmit(data);
-      setIsOpen(false);
-      setSelectedFile(null);
-      setFileName("Belum ada file dipilih");
-      setTitle("");
-      setAuthor("");
-      setCategoryId("");
-      setStock("");
-    } catch (error) {
+      handleCloseModal();
+    } catch (err) {
       setUploadError(
-        error instanceof Error ? error.message : "Terjadi kesalahan",
+        err instanceof Error ? err.message : "Gagal menambah buku",
       );
     } finally {
       setIsLoading(false);
@@ -158,7 +125,7 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
 
   const handleCloseModal = () => {
     setIsOpen(false);
-    setSelectedFile(null);
+    setImage(null);
     setFileName("Belum ada file dipilih");
     setUploadError("");
     setTitle("");
@@ -228,12 +195,12 @@ export default function AddBookButton({ onSubmit }: AddBookButtonProps) {
                   </p>
                   <label
                     htmlFor="book-image"
-                    className="inline-flex w-fit cursor-pointer items-center gap-2 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
+                    className="inline-flex w-fit cursor-pointer items-center gap-1 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-700 hover:bg-zinc-100"
                   >
                     <div className="h-4 w-4" aria-hidden="true">
-                      {selectedFile ? (
+                      {image ? (
                         <img
-                          src={URL.createObjectURL(selectedFile)}
+                          src={URL.createObjectURL(image)}
                           alt="Preview"
                           className="h-4 w-4"
                         />

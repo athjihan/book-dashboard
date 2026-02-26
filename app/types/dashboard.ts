@@ -35,14 +35,22 @@ export type PaginatedResponse<T> = {
   };
 };
 
-export type BookFormPayload = {
+export type CategoryFormPayload = {
+  name: string;
+};
+
+export type CreateBookFormPayload = {
   title: string;
   author: string;
   categoryId: string;
   stock: number;
-  imagePath: string;
+  image: File; // wajib
 };
 
-export type CategoryFormPayload = {
-  categoryName: string;
+export type UpdateBookFormPayload = {
+  title: string;
+  author: string;
+  categoryId: string;
+  stock: number;
+  image?: File; // opsional
 };

@@ -85,9 +85,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { categoryName } = body;
+    const name = String(body?.name ?? "").trim();
 
-    if (!categoryName) {
+    if (!name) {
       return NextResponse.json(
         {
           success: false,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     const category = await prisma.category.create({
-      data: { name: categoryName },
+      data: { name },
     });
 
     return NextResponse.json(
@@ -132,38 +132,63 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, categoryName } = body;
+    const id = String(body?.id ?? "").trim();
+    const name = String(body?.name ?? "").trim();
 
-    if (!id || !categoryName) {
+    if (!id || !name) {
       return NextResponse.json(
-        {
-          success: false,
-          status: 400,
-          message: "Missing required fields",
-        },
+        { success: false, status: 400, message: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    const existingCategory = await prisma.category.findUnique({
-      where: { id },
+    const existingCategory = await prisma.category.findFirst({
+      where: { id, deletedAt: null },
     });
 
-    if (categoryName === existingCategory?.name) {
+    if (!existingCategory) {
+      return NextResponse.json(
+        { success: false, status: 404, message: "Category not found" },
+        { status: 404 },
+      );
+    }
+
+    // no change -> langsung 200, tanpa query tambahan
+    if (existingCategory.name === name) {
       return NextResponse.json(
         {
           success: true,
           status: 200,
           message: "No changes detected",
-          category: existingCategory,
+          data: existingCategory,
         },
         { status: 200 },
       );
     }
 
-    const category = await prisma.category.update({
+    // cek duplikasi hanya kalau name memang berubah
+    const duplicate = await prisma.category.findFirst({
+      where: {
+        name,
+        deletedAt: null,
+        NOT: { id },
+      },
+    });
+
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          success: false,
+          status: 409,
+          message: "Category name already exists",
+        },
+        { status: 409 },
+      );
+    }
+
+    const updatedCategory = await prisma.category.update({
       where: { id },
-      data: { name: categoryName },
+      data: { name },
     });
 
     return NextResponse.json(
@@ -171,18 +196,14 @@ export async function PUT(request: NextRequest) {
         success: true,
         status: 200,
         message: "Category updated successfully",
-        category,
+        data: updatedCategory,
       },
       { status: 200 },
     );
   } catch (error) {
     console.error("Error updating category:", error);
     return NextResponse.json(
-      {
-        success: false,
-        status: 500,
-        message: "Internal server error",
-      },
+      { success: false, status: 500, message: "Internal server error" },
       { status: 500 },
     );
   }

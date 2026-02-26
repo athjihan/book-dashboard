@@ -9,11 +9,12 @@ import EditCategoryButton from "../components/EditCategoryButton";
 import DeleteCategoryButton from "../components/DeleteCategoryButton";
 import AddCategoryButton from "../components/AddCategoryButton";
 import type {
-  BookFormPayload,
   BookItem,
   CategoryFormPayload,
   CategoryItem,
+  CreateBookFormPayload,
   PaginatedResponse,
+  UpdateBookFormPayload,
 } from "../types/dashboard";
 
 export default function DashboardPage() {
@@ -32,76 +33,78 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAddBook = async (data: BookFormPayload) => {
-    try {
-      const response = await fetch(`/api/admin/books`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error("Gagal menyimpan buku");
-      }
+  const handleAddBook = async (data: CreateBookFormPayload) => {
+    const form = new FormData();
+    form.append("title", data.title);
+    form.append("author", data.author);
+    form.append("categoryId", data.categoryId);
+    form.append("stock", String(data.stock));
+    form.append("image", data.image);
 
-      fetchDashboardData();
-    } catch (error) {
-      setError("Gagal menyimpan buku");
+    const res = await fetch("/api/admin/books", {
+      method: "POST",
+      body: form,
+    });
+
+    if (!res.ok) {
+      throw new Error("Gagal menyimpan buku");
     }
+
+    fetchDashboardData();
   };
 
-  const handleEditBook = async (bookId: string, data: BookFormPayload) => {
-    try {
-      const response = await fetch(`/api/admin/books`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, id: bookId }),
-      });
+  const handleEditBook = async (
+    bookId: string,
+    data: UpdateBookFormPayload,
+  ) => {
+    const form = new FormData();
+    form.append("id", bookId);
+    form.append("title", data.title);
+    form.append("author", data.author);
+    form.append("categoryId", data.categoryId);
+    form.append("stock", String(data.stock));
+    if (data.image) form.append("image", data.image);
 
-      if (!response.ok) {
-        throw new Error("Gagal memperbarui data buku");
-      }
+    const res = await fetch(`/api/admin/books`, {
+      method: "PUT",
+      body: form,
+    });
 
-      fetchDashboardData();
-    } catch (error) {
-      setError("Gagal memperbarui buku");
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error(body?.message || "Gagal mengubah buku");
     }
+
+    fetchDashboardData();
   };
 
   const handleDeleteBook = async (bookId: string) => {
-    try {
-      const response = await fetch("/api/admin/books", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: bookId }),
-      });
+    const res = await fetch(`/api/admin/books`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: bookId }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Gagal menghapus buku");
-      }
-
-      fetchDashboardData();
-      setBookPage(1);
-    } catch (error) {
-      setError("Gagal menghapus buku");
+    if (!res.ok) {
+      throw new Error("Gagal menghapus buku");
     }
+
+    fetchDashboardData();
+    setBookPage(1);
   };
 
   const handleAddCategory = async (data: CategoryFormPayload) => {
-    try {
-      const response = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+    const res = await fetch("/api/admin/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) {
-        throw new Error("Gagal menyimpan kategori");
-      }
-
-      fetchDashboardData();
-    } catch (error) {
-      setError("Gagal menyimpan kategori");
+    if (!res.ok) {
+      throw new Error("Gagal menyimpan kategori");
     }
+
+    fetchDashboardData();
   };
 
   const handleEditCategory = async (
@@ -112,7 +115,7 @@ export default function DashboardPage() {
       const response = await fetch("/api/admin/categories", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, id: categoryId }),
+        body: JSON.stringify({ id: categoryId, ...data }),
       });
 
       if (!response.ok) {
@@ -126,22 +129,18 @@ export default function DashboardPage() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    try {
-      const response = await fetch("/api/admin/categories", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: categoryId }),
-      });
+    const res = await fetch(`/api/admin/categories`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: categoryId }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Gagal menghapus kategori");
-      }
-
-      fetchDashboardData();
-      setCategoryPage(1);
-    } catch (error) {
-      setError("Gagal menghapus kategori");
+    if (!res.ok) {
+      throw new Error("Gagal menghapus kategori");
     }
+
+    fetchDashboardData();
+    setCategoryPage(1);
   };
 
   const fetchDashboardData = async () => {

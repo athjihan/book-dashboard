@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import { unlink } from "fs/promises";
+import { mkdir, writeFile, unlink } from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 
 function getPaginationParams(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -90,43 +91,53 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { title, author, categoryId, imagePath, stock } = body;
+    const formData = await request.formData();
 
-    if (!title || !author || !categoryId || !imagePath || stock == null) {
+    const title = String(formData.get("title") ?? "").trim();
+    const author = String(formData.get("author") ?? "").trim();
+    const categoryId = String(formData.get("categoryId") ?? "").trim();
+    const stock = Number(formData.get("stock"));
+    const image = formData.get("image") as File;
+
+    if (!title || !author || !categoryId || Number.isNaN(stock) || !image) {
       return NextResponse.json(
-        {
-          success: false,
-          status: 400,
-          message: "Missing required fields",
-        },
+        { success: false, status: 400, message: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    let category = await prisma.category.findFirst({
-      where: { id: categoryId, deletedAt: null },
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
     });
 
     if (!category) {
       return NextResponse.json(
-        {
-          success: false,
-          status: 404,
-          message: "Category not found",
-        },
+        { success: false, status: 404, message: "Category not found" },
         { status: 404 },
       );
     }
 
+    if (!(image instanceof File) || !image.type.startsWith("image/")) {
+      return NextResponse.json(
+        { success: false, status: 400, message: "Invalid image type" },
+        { status: 400 },
+      );
+    }
+
+    const ext = image.name.split(".").pop();
+    const fileName = `${randomUUID()}.${ext}`;
+    const uploadDir = path.join(process.cwd(), "public");
+    const filePath = path.join(uploadDir, fileName);
+
+    await mkdir(uploadDir, { recursive: true });
+
+    const bytes = await image.arrayBuffer();
+    await writeFile(filePath, Buffer.from(bytes));
+
+    const imagePath = `/${fileName}`;
+
     const book = await prisma.book.create({
-      data: {
-        title,
-        author,
-        stock: parseInt(stock),
-        categoryId: category.id,
-        imagePath,
-      },
+      data: { title, author, stock, categoryId: category.id, imagePath },
       include: { category: true },
     });
 
@@ -140,13 +151,8 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
-    console.error("Error creating book:", error);
     return NextResponse.json(
-      {
-        success: false,
-        status: 500,
-        message: "Internal server error",
-      },
+      { success: false, status: 500, message: "Internal server error" },
       { status: 500 },
     );
   }
@@ -229,65 +235,89 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const { id, title, author, categoryId, stock, imagePath } = body;
+    const formData = await request.formData();
+
+    const id = String(formData.get("id") ?? "").trim();
+    const title = String(formData.get("title") ?? "").trim();
+    const author = String(formData.get("author") ?? "").trim();
+    const categoryId = String(formData.get("categoryId") ?? "").trim();
+    const stock = Number(formData.get("stock"));
+    const imageEntry = formData.get("image");
 
     if (
       !id ||
       !title ||
       !author ||
       !categoryId ||
-      !imagePath ||
-      stock == null
+      Number.isNaN(stock) ||
+      !(imageEntry instanceof File)
     ) {
       return NextResponse.json(
-        {
-          success: false,
-          status: 400,
-          message: "Missing required fields",
-        },
+        { success: false, status: 400, message: "Missing required fields" },
         { status: 400 },
-      );
-    }
-
-    let category = await prisma.category.findFirst({
-      where: { id: categoryId, deletedAt: null },
-    });
-
-    if (!category) {
-      return NextResponse.json(
-        {
-          success: false,
-          status: 404,
-          message: "Category not found",
-        },
-        { status: 404 },
       );
     }
 
     const existingBook = await prisma.book.findFirst({
       where: { id, deletedAt: null },
-      include: { category: true },
     });
 
     if (!existingBook) {
       return NextResponse.json(
-        {
-          success: false,
-          status: 404,
-          message: "Book not found",
-        },
+        { success: false, status: 404, message: "Book not found" },
         { status: 404 },
       );
     }
 
-    if (
-      title === existingBook.title &&
-      author === existingBook.author &&
-      categoryId === existingBook.categoryId &&
-      stock === existingBook.stock &&
-      imagePath === existingBook.imagePath
-    ) {
+    const dataToUpdate: {
+      title?: string;
+      author?: string;
+      categoryId?: string;
+      stock?: number;
+      imagePath?: string;
+    } = {};
+
+    if (existingBook.title !== title) dataToUpdate.title = title;
+    if (existingBook.author !== author) dataToUpdate.author = author;
+    if (existingBook.stock !== stock) dataToUpdate.stock = stock;
+
+    if (existingBook.categoryId !== categoryId) {
+      const category = await prisma.category.findUnique({
+        where: { id: categoryId, deletedAt: null },
+      });
+
+      if (!category) {
+        return NextResponse.json(
+          { success: false, status: 404, message: "Category not found" },
+          { status: 404 },
+        );
+      }
+
+      dataToUpdate.categoryId = categoryId;
+    }
+
+    const hasNewImage = imageEntry instanceof File && imageEntry.size > 0;
+    if (hasNewImage) {
+      if (!imageEntry.type.startsWith("image/")) {
+        return NextResponse.json(
+          { success: false, status: 400, message: "Invalid image type" },
+          { status: 400 },
+        );
+      }
+
+      const ext = imageEntry.name.split(".").pop() || "jpg";
+      const fileName = `${randomUUID()}.${ext}`;
+      const uploadDir = path.join(process.cwd(), "public");
+      const filePath = path.join(uploadDir, fileName);
+
+      await mkdir(uploadDir, { recursive: true });
+      const bytes = await imageEntry.arrayBuffer();
+      await writeFile(filePath, Buffer.from(bytes));
+
+      dataToUpdate.imagePath = `/${fileName}`;
+    }
+
+    if (Object.keys(dataToUpdate).length === 0) {
       return NextResponse.json(
         {
           success: true,
@@ -299,46 +329,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const book = await prisma.book.update({
+    const updatedBook = await prisma.book.update({
       where: { id },
-      data: {
-        title,
-        author,
-        stock,
-        categoryId: category.id,
-        imagePath,
-      },
-      include: {
-        category: true,
-      },
+      data: dataToUpdate,
+      include: { category: true },
     });
-
-    if (imagePath !== existingBook.imagePath) {
-      const oldImagePath = path.join(
-        process.cwd(),
-        "public",
-        existingBook.imagePath,
-      );
-      await unlink(oldImagePath);
-    }
 
     return NextResponse.json(
       {
         success: true,
         status: 200,
         message: "Book updated successfully",
-        book,
+        book: updatedBook,
       },
       { status: 200 },
     );
   } catch (error) {
     console.error("Error updating book:", error);
     return NextResponse.json(
-      {
-        success: false,
-        status: 500,
-        message: "Internal server error",
-      },
+      { success: false, status: 500, message: "Internal server error" },
       { status: 500 },
     );
   }

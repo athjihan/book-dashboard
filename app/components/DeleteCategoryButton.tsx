@@ -20,8 +20,14 @@ export default function DeleteCategoryButton({
     event.preventDefault();
     setIsLoading(true);
 
-    await onSubmit(category.id).finally(() => setIsLoading(false));
-    setIsOpen(false);
+    try {
+      await onSubmit(category.id);
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
+    }
   };
 
   return (

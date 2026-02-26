@@ -15,18 +15,20 @@ export default function EditCategoryButton({
 }: EditCategoryButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState(category.name);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(event.currentTarget);
-    const data = {
-      categoryName: formData.get("categoryName") as string,
-    };
-
-    await onSubmit(category.id, data).finally(() => setIsLoading(false));
-    setIsOpen(false);
+    try {
+      await onSubmit(category.id, name ? { name } : { name: category.name });
+    } catch (error) {
+      console.error("Error submitting category:", error);
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -64,7 +66,8 @@ export default function EditCategoryButton({
                   required
                   className="rounded-lg border border-zinc-200 px-3 py-2 text-xs md:text-sm lg:text-base text-zinc-900 focus:border-blue-600 focus:outline-none"
                   placeholder="Contoh: Teknologi"
-                  defaultValue={category.name}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </label>
 
