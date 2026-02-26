@@ -124,8 +124,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const ext = image.name.split(".").pop();
-    const fileName = `${randomUUID()}.${ext}`;
+    const fileName = generateFileName(image.name);
+
     const uploadDir = path.join(process.cwd(), "public");
     const filePath = path.join(uploadDir, fileName);
 
@@ -244,14 +244,8 @@ export async function PUT(request: NextRequest) {
     const stock = Number(formData.get("stock"));
     const imageEntry = formData.get("image");
 
-    if (
-      !id ||
-      !title ||
-      !author ||
-      !categoryId ||
-      Number.isNaN(stock) ||
-      !(imageEntry instanceof File)
-    ) {
+    // image TIDAK wajib saat update
+    if (!id || !title || !author || !categoryId || Number.isNaN(stock)) {
       return NextResponse.json(
         { success: false, status: 400, message: "Missing required fields" },
         { status: 400 },
@@ -282,7 +276,7 @@ export async function PUT(request: NextRequest) {
     if (existingBook.stock !== stock) dataToUpdate.stock = stock;
 
     if (existingBook.categoryId !== categoryId) {
-      const category = await prisma.category.findUnique({
+      const category = await prisma.category.findFirst({
         where: { id: categoryId, deletedAt: null },
       });
 
@@ -297,6 +291,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const hasNewImage = imageEntry instanceof File && imageEntry.size > 0;
+
     if (hasNewImage) {
       if (!imageEntry.type.startsWith("image/")) {
         return NextResponse.json(
@@ -305,8 +300,7 @@ export async function PUT(request: NextRequest) {
         );
       }
 
-      const ext = imageEntry.name.split(".").pop() || "jpg";
-      const fileName = `${randomUUID()}.${ext}`;
+      const fileName = generateFileName(imageEntry.name);
       const uploadDir = path.join(process.cwd(), "public");
       const filePath = path.join(uploadDir, fileName);
 
@@ -335,6 +329,21 @@ export async function PUT(request: NextRequest) {
       include: { category: true },
     });
 
+    // hpus image lama hanya jika user upload image baru
+    if (
+      hasNewImage &&
+      existingBook.imagePath &&
+      dataToUpdate.imagePath &&
+      dataToUpdate.imagePath !== existingBook.imagePath
+    ) {
+      const oldImagePath = path.join(
+        process.cwd(),
+        "public",
+        existingBook.imagePath.replace(/^\/+/, ""),
+      );
+      await unlink(oldImagePath);
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -351,4 +360,17 @@ export async function PUT(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+function generateFileName(originalName: string): string {
+  const ext = path.extname(originalName).toLowerCase();
+  const random = Math.random().toString(36).substring(2, 8);
+  const nameWithoutExt = path.basename(originalName, ext);
+
+  const safeName = nameWithoutExt
+    .trim()
+    .replace(/[^\w\- ]+/g, "")
+    .replace(/\s+/g, "-");
+
+  return `${safeName}-${random}${ext}`;
 }
